@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "982181068163",
+    "project_id": "robolearn-b6a71",
+    "storage_bucket": "robolearn-b6a71.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:982181068163:android:d33a099eebb4a87bcacab6",
+        "android_client_info": {
+          "package_name": "com.example.robolearn"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAfNt4CCWmS_yJy7EnsB1p6wflUXDqe7Tg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
