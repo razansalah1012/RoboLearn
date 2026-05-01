@@ -1,25 +1,29 @@
 import 'package:flutter/material.dart';
 
 class AppColors {
-  // Primary Colors (5-Color Palette)
+  // Primary Brand Colors
   static const Color cranberry = Color(0xFF3F1116);
-  static const Color beige = Color(0xFFFEEFDC);
   static const Color plum = Color(0xFF64343C);
-  static const Color taupe = Color(0xFF907960);
-  static const Color ivory = Color(0xFFFFF1E9);
 
-  // Background Colors
+  // Improved Neutral Colors
+  static const Color beige = Color(0xFFF8F6F2); // upgraded premium background
+  static const Color taupe = Color(0xFF7A6856); // stronger readable brown
+  static const Color ivory = Color(0xFFFFFAF7); // cleaner soft card color
+
+  // Extra Utility Colors
   static const Color pureWhite = Color(0xFFFFFFFF);
-  static const Color cardBackground = pureWhite;
+  static const Color cardBackground = ivory;
   static const Color headerBackground = cranberry;
-  
-  // Shadows & Depth (using with opacity where requested)
-  // Soft Shadow: 0 4px 20px rgba(139, 21, 56, 0.08) -> RGB(139, 21, 56) is roughly #8B1538 (a cranberry/plum shade)
-  static Color softShadowColor() => const Color(0xFF8B1538).withAlpha(20); // 0.08 * 255 ≈ 20
-  // Card Shadow: 0 2px 15px rgba(0, 0, 0, 0.05)
-  static Color cardShadowColor() => Colors.black.withAlpha(13); // 0.05 * 255 ≈ 13
-  // Hover Shadow: 0 8px 25px rgba(139, 21, 56, 0.15)
-  static Color hoverShadowColor() => const Color(0xFF8B1538).withAlpha(38); // 0.15 * 255 ≈ 38
+
+  // Shadows
+  static Color softShadowColor() =>
+      const Color(0xFF8B1538).withAlpha(20);
+
+  static Color cardShadowColor() =>
+      Colors.black.withAlpha(13);
+
+  static Color hoverShadowColor() =>
+      const Color(0xFF8B1538).withAlpha(38);
 
   // Gradients
   static const LinearGradient primaryGradient = LinearGradient(
