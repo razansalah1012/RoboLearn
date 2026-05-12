@@ -6,12 +6,14 @@ class AnimatedInteractiveCard extends StatefulWidget {
   final Widget child;
   final VoidCallback? onTap;
   final EdgeInsetsGeometry padding;
+  final EdgeInsetsGeometry? margin;
 
   const AnimatedInteractiveCard({
     super.key,
     required this.child,
     this.onTap,
     this.padding = const EdgeInsets.all(30.0),
+    this.margin,
   });
 
   @override
@@ -33,6 +35,7 @@ class _AnimatedInteractiveCardState extends State<AnimatedInteractiveCard>
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 400),
           curve: Curves.fastOutSlowIn, // Approx cubic-bezier transition
+          margin: widget.margin,
           transform: Matrix4.translationValues(0, _isHovered ? -8.0 : 0, 0)
             ..scale(_isHovered ? 1.02 : 1.0),
           decoration: BoxDecoration(

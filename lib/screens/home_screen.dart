@@ -6,6 +6,7 @@ import '../widgets/custom_bottom_nav.dart';
 import '../widgets/tech_background_animation.dart';
 import 'login_screen.dart';
 import '../services/auth_service.dart';
+import 'learning_module_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -53,45 +54,50 @@ class _HomeScreenState extends State<HomeScreen>
     setState(() => _selectedNavIndex = i);
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.beige,
-      body: Stack(
-        children: [
-          const Positioned.fill(
-            child: TechBackgroundAnimation(),
-          ),
-          Column(
-            children: [
-              const _HomeHeader(),
-              Expanded(
-                child: Center(
-                  child: SingleChildScrollView(
-                    controller: _scrollController,
-                    child: AnimatedBuilder(
-                      animation: _heroController,
-                      builder: (context, child) => Opacity(
-                        opacity: _heroFade.value,
-                        child: Transform.translate(
-                          offset: Offset(0, _heroSlide.value),
-                          child: child,
+  Widget _buildBody() {
+    switch (_selectedNavIndex) {
+      case 1:
+        return const LearningModuleScreen();
+      default:
+        return Stack(
+          children: [
+            const Positioned.fill(child: TechBackgroundAnimation()),
+            Column(
+              children: [
+                const _HomeHeader(),
+                Expanded(
+                  child: Center(
+                    child: SingleChildScrollView(
+                      controller: _scrollController,
+                      child: AnimatedBuilder(
+                        animation: _heroController,
+                        builder: (context, child) => Opacity(
+                          opacity: _heroFade.value,
+                          child: Transform.translate(
+                            offset: Offset(0, _heroSlide.value),
+                            child: child,
+                          ),
                         ),
-                      ),
-                      child: _HeroSection(
-                        onExplore: null,
-                        onDemo: () {
-                          // Demo functionality pending
-                        },
+                        child: _HeroSection(
+                          onExplore: null,
+                          onDemo: () {},
+                        ),
                       ),
                     ),
                   ),
                 ),
-              ),
-            ],
-          ),
-        ],
-      ),
+              ],
+            ),
+          ],
+        );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: AppColors.beige,
+      body: _buildBody(),
       bottomNavigationBar: CustomBottomNavBar(
         selectedIndex: _selectedNavIndex,
         onTap: _onNavTap,

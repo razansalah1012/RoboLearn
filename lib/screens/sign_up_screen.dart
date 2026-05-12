@@ -4,7 +4,7 @@ import '../theme/app_theme.dart';
 import '../widgets/tech_background_animation.dart';
 import '../widgets/animated_interactive_card.dart';
 import 'home_screen.dart';
-import 'admin_screen.dart';
+import 'committee_dashboard.dart';
 import '../services/auth_service.dart';
 
 class SignUpScreen extends StatefulWidget {
@@ -213,7 +213,7 @@ class _SignUpScreenState extends State<SignUpScreen>
                                               context,
                                               MaterialPageRoute(
                                                 builder: (context) =>
-                                                    const AdminScreen(),
+                                                    const CommitteeDashboard(),
                                               ),
                                             );
                                           } else {
