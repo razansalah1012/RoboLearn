@@ -24,6 +24,7 @@ class _LoginScreenState extends State<LoginScreen>
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   final AuthService authService = AuthService();
+  bool _isLoading = false;
 
   @override
   void initState() {
@@ -184,32 +185,56 @@ class _LoginScreenState extends State<LoginScreen>
 
                                 // 🔘 Login Button
                                 ElevatedButton(
-                                  onPressed: () {
-                                    String email = emailController.text.trim();
+                                  onPressed: _isLoading
+                                      ? null
+                                      : () async {
+                                          setState(() => _isLoading = true);
+                                          String email = emailController.text.trim();
+                                          String password = passwordController.text.trim();
 
-                                    String role = authService.mockLogin(email);
+                                          final user = await authService.signIn(email, password);
 
-                                    if (role == "admin") {
-                                      Navigator.pushReplacement(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (context) =>
-                                              const AdminScreen(),
-                                        ),
-                                      );
-                                    } else {
-                                      Navigator.pushReplacement(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (context) =>
-                                              const HomeScreen(),
-                                        ),
-                                      );
-                                    }
-                                  },
-                                  // Pill shape button override if needed, but AppTheme sets Medium.
-                                  // Spec says "Pill: 50px - Navigation links", Medium for Buttons
-                                  child: const Text("LOGIN"),
+                                          if (user != null) {
+                                            final userData = await authService.getUserData(user.uid);
+                                            final String role = userData?.role ?? 'student';
+
+                                            if (role == "committee") {
+                                              Navigator.pushReplacement(
+                                                context,
+                                                MaterialPageRoute(
+                                                  builder: (context) =>
+                                                      const AdminScreen(),
+                                                ),
+                                              );
+                                            } else {
+                                              Navigator.pushReplacement(
+                                                context,
+                                                MaterialPageRoute(
+                                                  builder: (context) =>
+                                                      const HomeScreen(),
+                                                ),
+                                              );
+                                            }
+                                          } else {
+                                            setState(() => _isLoading = false);
+                                            ScaffoldMessenger.of(context).showSnackBar(
+                                              const SnackBar(
+                                                content: Text("Login Failed. Please check your credentials."),
+                                                backgroundColor: Colors.red,
+                                              ),
+                                            );
+                                          }
+                                        },
+                                  child: _isLoading
+                                      ? const SizedBox(
+                                          height: 20,
+                                          width: 20,
+                                          child: CircularProgressIndicator(
+                                            strokeWidth: 2,
+                                            color: Colors.white,
+                                          ),
+                                        )
+                                      : const Text("LOGIN"),
                                 ),
                               ],
                             ),

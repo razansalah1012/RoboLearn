@@ -4,6 +4,8 @@ import '../theme/app_theme.dart';
 import '../widgets/tech_background_animation.dart';
 import '../widgets/animated_interactive_card.dart';
 import 'home_screen.dart';
+import 'admin_screen.dart';
+import '../services/auth_service.dart';
 
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({super.key});
@@ -17,6 +19,14 @@ class _SignUpScreenState extends State<SignUpScreen>
   late AnimationController _fadeController;
   late Animation<double> _fadeAnimation;
   late Animation<double> _translateAnimation;
+
+  final TextEditingController nameController = TextEditingController();
+  final TextEditingController emailController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
+  final AuthService authService = AuthService();
+
+  String _selectedRole = 'student';
+  bool _isLoading = false;
 
   @override
   void initState() {
@@ -126,6 +136,7 @@ class _SignUpScreenState extends State<SignUpScreen>
 
                               // 👤 Name Field
                               TextField(
+                                controller: nameController,
                                 decoration: InputDecoration(
                                   labelText: "Name",
                                   prefixIcon: const Icon(Icons.person_outline),
@@ -135,6 +146,7 @@ class _SignUpScreenState extends State<SignUpScreen>
 
                               // 📧 Email Field
                               TextField(
+                                controller: emailController,
                                 decoration: InputDecoration(
                                   labelText: "Email",
                                   prefixIcon: const Icon(Icons.email_outlined),
@@ -144,26 +156,95 @@ class _SignUpScreenState extends State<SignUpScreen>
 
                               // 🔒 Password Field
                               TextField(
+                                controller: passwordController,
                                 obscureText: true,
                                 decoration: InputDecoration(
                                   labelText: "Password",
                                   prefixIcon: const Icon(Icons.lock_outline),
                                 ),
                               ),
+                              const SizedBox(height: 20),
+
+                              // 🎭 Role Selection
+                              DropdownButtonFormField<String>(
+                                value: _selectedRole,
+                                decoration: InputDecoration(
+                                  labelText: "Role",
+                                  prefixIcon: const Icon(Icons.badge_outlined),
+                                ),
+                                items: const [
+                                  DropdownMenuItem(
+                                    value: 'student',
+                                    child: Text("Student"),
+                                  ),
+                                  DropdownMenuItem(
+                                    value: 'committee',
+                                    child: Text("Committee Member"),
+                                  ),
+                                ],
+                                onChanged: (value) {
+                                  if (value != null) {
+                                    setState(() => _selectedRole = value);
+                                  }
+                                },
+                              ),
                               const SizedBox(height: 32),
 
                               // 🔘 Sign Up Button
                               ElevatedButton(
-                                onPressed: () {
-                                  Navigator.pushReplacement(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) =>
-                                          const HomeScreen(),
-                                    ),
-                                  );
-                                },
-                                child: const Text("SIGN UP"),
+                                onPressed: _isLoading
+                                    ? null
+                                    : () async {
+                                        setState(() => _isLoading = true);
+                                        String name = nameController.text.trim();
+                                        String email = emailController.text.trim();
+                                        String password = passwordController.text.trim();
+
+                                        final user = await authService.signUp(
+                                          email: email,
+                                          password: password,
+                                          name: name,
+                                          role: _selectedRole,
+                                        );
+
+                                        if (user != null) {
+                                          if (_selectedRole == 'committee') {
+                                            Navigator.pushReplacement(
+                                              context,
+                                              MaterialPageRoute(
+                                                builder: (context) =>
+                                                    const AdminScreen(),
+                                              ),
+                                            );
+                                          } else {
+                                            Navigator.pushReplacement(
+                                              context,
+                                              MaterialPageRoute(
+                                                builder: (context) =>
+                                                    const HomeScreen(),
+                                              ),
+                                            );
+                                          }
+                                        } else {
+                                          setState(() => _isLoading = false);
+                                          ScaffoldMessenger.of(context).showSnackBar(
+                                            const SnackBar(
+                                              content: Text("Sign Up Failed. Try again."),
+                                              backgroundColor: Colors.red,
+                                            ),
+                                          );
+                                        }
+                                      },
+                                child: _isLoading
+                                    ? const SizedBox(
+                                        height: 20,
+                                        width: 20,
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2,
+                                          color: Colors.white,
+                                        ),
+                                      )
+                                    : const Text("SIGN UP"),
                               ),
                             ],
                           ),

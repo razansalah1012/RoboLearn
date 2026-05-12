@@ -5,6 +5,8 @@ import '../theme/app_colors.dart';
 import '../theme/app_theme.dart';
 import '../widgets/tech_background_animation.dart';
 import '../widgets/animated_interactive_card.dart';
+import '../services/auth_service.dart';
+import 'login_screen.dart';
 
 class AdminScreen extends StatefulWidget {
   const AdminScreen({super.key});
@@ -162,6 +164,24 @@ class _AdminHeader extends StatelessWidget {
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              FutureBuilder(
+                future: AuthService().getUserData(AuthService().currentUser?.uid ?? ""),
+                builder: (context, snapshot) {
+                  String adminName = "Committee Member";
+                  if (snapshot.hasData && snapshot.data != null) {
+                    adminName = snapshot.data!.name;
+                  }
+                  return Text(
+                    "Welcome, $adminName",
+                    style: GoogleFonts.exo2(
+                      fontSize: 13,
+                      color: AppColors.ivory.withAlpha(200),
+                      fontWeight: FontWeight.w400,
+                    ),
+                  );
+                },
+              ),
+              const SizedBox(height: 4),
               Text(
                 "Admin Dashboard",
                 style: GoogleFonts.orbitron(
@@ -180,10 +200,29 @@ class _AdminHeader extends StatelessWidget {
               ),
             ],
           ),
-          const Icon(
-            Icons.admin_panel_settings_rounded,
-            color: AppColors.ivory,
-            size: 36,
+          Row(
+            children: [
+              const Icon(
+                Icons.admin_panel_settings_rounded,
+                color: AppColors.ivory,
+                size: 36,
+              ),
+              const SizedBox(width: 8),
+              IconButton(
+                icon: const Icon(Icons.logout_rounded, color: AppColors.ivory),
+                tooltip: "Logout",
+                onPressed: () async {
+                  await AuthService().signOut();
+                  if (context.mounted) {
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const LoginScreen()),
+                    );
+                  }
+                },
+              ),
+            ],
           )
         ],
       ),

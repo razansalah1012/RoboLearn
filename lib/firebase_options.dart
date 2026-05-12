@@ -64,6 +64,7 @@ class DefaultFirebaseOptions {
     messagingSenderId: '982181068163',
     projectId: 'robolearn-b6a71',
     storageBucket: 'robolearn-b6a71.firebasestorage.app',
+    iosClientId: '982181068163-nee1k5tihfru948anlfdfqtlrtjglhug.apps.googleusercontent.com',
     iosBundleId: 'com.example.robolearn',
   );
 
@@ -73,6 +74,7 @@ class DefaultFirebaseOptions {
     messagingSenderId: '982181068163',
     projectId: 'robolearn-b6a71',
     storageBucket: 'robolearn-b6a71.firebasestorage.app',
+    iosClientId: '982181068163-nee1k5tihfru948anlfdfqtlrtjglhug.apps.googleusercontent.com',
     iosBundleId: 'com.example.robolearn',
   );
 
@@ -85,4 +87,5 @@ class DefaultFirebaseOptions {
     storageBucket: 'robolearn-b6a71.firebasestorage.app',
     measurementId: 'G-QZYQ7PXJ74',
   );
+
 }

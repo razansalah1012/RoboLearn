@@ -5,6 +5,7 @@ import '../theme/app_theme.dart';
 import '../widgets/custom_bottom_nav.dart';
 import '../widgets/tech_background_animation.dart';
 import 'login_screen.dart';
+import '../services/auth_service.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -134,39 +135,65 @@ class _HomeHeader extends StatelessWidget {
                       fontWeight: FontWeight.w400,
                     ),
                   ),
-                  Text(
-                    'RoboLearner',
-                    style: GoogleFonts.orbitron(
-                      fontSize: 22,
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.ivory,
-                    ),
+                  FutureBuilder(
+                    future: AuthService().getUserData(AuthService().currentUser?.uid ?? ""),
+                    builder: (context, snapshot) {
+                      String displayName = "RoboLearner";
+                      if (snapshot.hasData && snapshot.data != null) {
+                        displayName = snapshot.data!.name;
+                      }
+                      return Text(
+                        displayName,
+                        style: GoogleFonts.orbitron(
+                          fontSize: 22,
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.ivory,
+                        ),
+                      );
+                    },
                   ),
                 ],
               ),
-              Stack(
+              Row(
                 children: [
-                  Container(
-                    width: 44,
-                    height: 44,
-                    decoration: BoxDecoration(
-                      color: AppColors.ivory.withAlpha(30),
-                      borderRadius: BorderRadius.circular(14),
-                    ),
-                    child: const Icon(Icons.notifications_outlined,
-                        color: AppColors.ivory, size: 22),
-                  ),
-                  Positioned(
-                    top: 6,
-                    right: 6,
-                    child: Container(
-                      width: 10,
-                      height: 10,
-                      decoration: const BoxDecoration(
-                        color: Color(0xFFFF6B6B),
-                        shape: BoxShape.circle,
+                  Stack(
+                    children: [
+                      Container(
+                        width: 44,
+                        height: 44,
+                        decoration: BoxDecoration(
+                          color: AppColors.ivory.withAlpha(30),
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                        child: const Icon(Icons.notifications_outlined,
+                            color: AppColors.ivory, size: 22),
                       ),
-                    ),
+                      Positioned(
+                        top: 6,
+                        right: 6,
+                        child: Container(
+                          width: 10,
+                          height: 10,
+                          decoration: const BoxDecoration(
+                            color: Color(0xFFFF6B6B),
+                            shape: BoxShape.circle,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.logout_rounded, color: AppColors.ivory),
+                    tooltip: "Logout",
+                    onPressed: () async {
+                      await AuthService().signOut();
+                      if (context.mounted) {
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(builder: (context) => const LoginScreen()),
+                        );
+                      }
+                    },
                   ),
                 ],
               ),
