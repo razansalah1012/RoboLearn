@@ -5,6 +5,16 @@ import '../models/user_model.dart';
 class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _db = FirebaseFirestore.instance;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
+  Future<void> updateUserData(String userId, Map<String, dynamic> data) async {
+  try {
+    await _firestore.collection('users').doc(userId).update(data);
+  } catch (e) {
+    // If document doesn't exist, create it
+    await _firestore.collection('users').doc(userId).set(data);
+  }
+}
 
   // Sign Up with Role
   Future<User?> signUp({

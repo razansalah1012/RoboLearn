@@ -7,6 +7,7 @@ import '../widgets/tech_background_animation.dart';
 import 'login_screen.dart';
 import '../services/auth_service.dart';
 import 'learning_module_screen.dart';
+import 'profile_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -58,6 +59,8 @@ class _HomeScreenState extends State<HomeScreen>
     switch (_selectedNavIndex) {
       case 1:
         return const LearningModuleScreen();
+      case 3:
+        return const ProfileScreen();
       default:
         return Stack(
           children: [
