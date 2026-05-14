@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
-import 'screens/intro_screen.dart';
+import 'screens/auth_wrapper.dart';
 import 'theme/app_theme.dart';
 
 void main() async {
@@ -23,7 +23,7 @@ class RoboLearnApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'RoboLearn',
       theme: AppTheme.lightTheme,
-      home: const IntroScreen(),
+      home: const AuthWrapper(),
     );
   }
 }

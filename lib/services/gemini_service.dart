@@ -1,4 +1,3 @@
-import 'dart:math';
 import '../models/learning_module_model.dart';
 
 class GeminiService {

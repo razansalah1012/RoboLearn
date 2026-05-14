@@ -3,17 +3,24 @@ import 'package:google_fonts/google_fonts.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_theme.dart';
 import '../models/learning_module_model.dart';
+import 'learning/lesson_view_screen.dart';
 
 class LearningModuleDetailScreen extends StatelessWidget {
+  final Course course; // Context of the parent discipline
   final LearningModule module;
 
-  const LearningModuleDetailScreen({super.key, required this.module});
+  const LearningModuleDetailScreen({
+    super.key, 
+    required this.course, 
+    required this.module,
+  });
 
   Color get _difficultyColor {
-    switch (module.difficulty) {
-      case 'Intermediate':
+    // Difficulty is an Enum in our Pro Model
+    switch (course.difficulty) {
+      case Difficulty.intermediate:
         return const Color(0xFF4A7C59);
-      case 'Advanced':
+      case Difficulty.advanced:
         return AppColors.cranberry;
       default:
         return AppColors.taupe;
@@ -39,15 +46,11 @@ class LearningModuleDetailScreen extends StatelessWidget {
             flexibleSpace: FlexibleSpaceBar(
               background: Container(
                 decoration: const BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [AppColors.cranberry, AppColors.plum],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
+                  gradient: AppColors.primaryGradient,
                 ),
                 child: Stack(
                   children: [
-                    // decorative circles
+                    // decorative background elements
                     Positioned(
                       right: -40,
                       top: -40,
@@ -60,18 +63,6 @@ class LearningModuleDetailScreen extends StatelessWidget {
                         ),
                       ),
                     ),
-                    Positioned(
-                      left: -20,
-                      bottom: -30,
-                      child: Container(
-                        width: 140,
-                        height: 140,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: AppColors.ivory.withAlpha(8),
-                        ),
-                      ),
-                    ),
                     SafeArea(
                       child: Padding(
                         padding: const EdgeInsets.fromLTRB(24, 50, 24, 24),
@@ -81,19 +72,23 @@ class LearningModuleDetailScreen extends StatelessWidget {
                           children: [
                             Row(
                               children: [
-                                _Badge(label: module.category, color: AppColors.ivory.withAlpha(40)),
+                                _Badge(label: course.category, color: AppColors.ivory.withAlpha(40)),
                                 const SizedBox(width: 8),
-                                _Badge(label: module.difficulty, color: _difficultyColor.withAlpha(180)),
+                                _Badge(
+                                  label: course.difficulty.name.toUpperCase(), 
+                                  color: _difficultyColor.withAlpha(180),
+                                ),
                               ],
                             ),
                             const SizedBox(height: 10),
                             Text(
-                              module.title,
+                              module.title.toUpperCase(),
                               style: GoogleFonts.orbitron(
                                 fontSize: 22,
-                                fontWeight: FontWeight.w700,
+                                fontWeight: FontWeight.w900,
                                 color: AppColors.ivory,
                                 height: 1.3,
+                                letterSpacing: 1,
                               ),
                             ),
                           ],
@@ -113,115 +108,17 @@ class LearningModuleDetailScreen extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Description box
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: AppColors.ivory,
-                      borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
-                      border: Border.all(
-                          color: AppColors.plum.withAlpha(25), width: 1),
-                      boxShadow: [
-                        BoxShadow(
-                          color: AppColors.cranberry.withAlpha(10),
-                          blurRadius: 12,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
-                    ),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.all(8),
-                          decoration: BoxDecoration(
-                            color: AppColors.cranberry.withAlpha(15),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: const Icon(Icons.info_outline_rounded,
-                              color: AppColors.cranberry, size: 18),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Text(
-                            module.description,
-                            style: GoogleFonts.exo2(
-                              fontSize: 14,
-                              color: AppColors.taupe,
-                              height: 1.6,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-
+                  _buildObjectiveCard(),
                   const SizedBox(height: 28),
-
-                  Text(
-                    'Module Content',
-                    style: GoogleFonts.orbitron(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.cranberry,
-                    ),
-                  ),
-
-                  const SizedBox(height: 4),
-                  Container(
-                    height: 3,
-                    width: 48,
-                    decoration: BoxDecoration(
-                      gradient: AppColors.primaryGradient,
-                      borderRadius: BorderRadius.circular(2),
-                    ),
-                  ),
+                  _buildSectionTitle('Technical Curriculum'),
                   const SizedBox(height: 20),
-
-                  // Main content
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(20),
-                    decoration: BoxDecoration(
-                      color: AppColors.ivory,
-                      borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
-                      border: Border.all(
-                          color: AppColors.plum.withAlpha(20), width: 1),
-                    ),
-                    child: Text(
-                      module.content.isEmpty
-                          ? 'No content available for this module yet.'
-                          : module.content,
-                      style: GoogleFonts.exo2(
-                        fontSize: 14,
-                        color: AppColors.cranberry,
-                        height: 1.8,
-                      ),
-                    ),
-                  ),
-
+                  _buildLessonList(context),
                   const SizedBox(height: 32),
-
-                  // Meta footer
-                  Row(
-                    children: [
-                      Icon(Icons.schedule_rounded,
-                          size: 14, color: AppColors.taupe.withAlpha(180)),
-                      const SizedBox(width: 6),
-                      Text(
-                        'Published ${_formatDate(module.createdAt)}',
-                        style: GoogleFonts.exo2(
-                            fontSize: 12, color: AppColors.taupe),
-                      ),
-                    ],
-                  ),
-                  
+                  _buildFooterMeta(),
                   if (module.quiz.isNotEmpty) ...[
                     const SizedBox(height: 32),
-                    _QuizSection(module: module),
+                    _QuizCTA(module: module),
                   ],
-                  
                   const SizedBox(height: 40),
                 ],
               ),
@@ -232,200 +129,128 @@ class LearningModuleDetailScreen extends StatelessWidget {
     );
   }
 
-  String _formatDate(DateTime dt) {
-    const months = [
-      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
-    ];
-    return '${months[dt.month - 1]} ${dt.day}, ${dt.year}';
-  }
-}
-
-class _QuizSection extends StatefulWidget {
-  final LearningModule module;
-  const _QuizSection({required this.module});
-
-  @override
-  State<_QuizSection> createState() => _QuizSectionState();
-}
-
-class _QuizSectionState extends State<_QuizSection> {
-  int? _selectedAnswer;
-  int _currentQuestionIndex = 0;
-  int _score = 0;
-  bool _quizCompleted = false;
-
-  void _submitAnswer() {
-    if (_selectedAnswer == null) return;
-    
-    if (_selectedAnswer == widget.module.quiz[_currentQuestionIndex].correctIndex) {
-      _score++;
-    }
-
-    if (_currentQuestionIndex < widget.module.quiz.length - 1) {
-      setState(() {
-        _currentQuestionIndex++;
-        _selectedAnswer = null;
-      });
-    } else {
-      setState(() {
-        _quizCompleted = true;
-      });
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    if (_quizCompleted) {
-      return Container(
-        padding: const EdgeInsets.all(24),
-        decoration: BoxDecoration(
-          color: const Color(0xFF4A7C59).withAlpha(15),
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: const Color(0xFF4A7C59).withAlpha(40)),
-        ),
-        child: Column(
-          children: [
-            const Icon(Icons.stars_rounded, color: Color(0xFF4A7C59), size: 48),
-            const SizedBox(height: 16),
-            Text(
-              'Quiz Completed!',
-              style: GoogleFonts.orbitron(
-                fontSize: 18,
-                fontWeight: FontWeight.w700,
-                color: const Color(0xFF4A7C59),
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'You scored $_score out of ${widget.module.quiz.length}',
-              style: GoogleFonts.exo2(fontSize: 15, color: AppColors.taupe),
-            ),
-            const SizedBox(height: 20),
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF4A7C59),
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-              ),
-              onPressed: () => setState(() {
-                _quizCompleted = false;
-                _currentQuestionIndex = 0;
-                _score = 0;
-                _selectedAnswer = null;
-              }),
-              child: const Text('Retry Quiz'),
-            ),
-          ],
-        ),
-      );
-    }
-
-    final q = widget.module.quiz[_currentQuestionIndex];
-
+  Widget _buildObjectiveCard() {
     return Container(
-      padding: const EdgeInsets.all(24),
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppColors.plum.withAlpha(10),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: AppColors.plum.withAlpha(30)),
+        color: AppColors.ivory,
+        borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
+        border: Border.all(color: AppColors.plum.withAlpha(25)),
+        boxShadow: [BoxShadow(color: AppColors.cranberry.withAlpha(10), blurRadius: 12, offset: const Offset(0, 4))],
       ),
-      child: Column(
+      child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              const Icon(Icons.psychology_rounded, color: AppColors.plum, size: 24),
-              const SizedBox(width: 12),
-              Text(
-                'Knowledge Check',
-                style: GoogleFonts.orbitron(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w700,
-                  color: AppColors.plum,
-                ),
-              ),
-              const Spacer(),
-              Text(
-                'Q${_currentQuestionIndex + 1}/${widget.module.quiz.length}',
-                style: GoogleFonts.exo2(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.taupe),
-              ),
-            ],
-          ),
-          const SizedBox(height: 20),
-          Text(
-            q.question,
-            style: GoogleFonts.exo2(
-              fontSize: 15,
-              fontWeight: FontWeight.w600,
-              color: AppColors.cranberry,
-              height: 1.4,
+          const Icon(Icons.info_outline_rounded, color: AppColors.cranberry, size: 20),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              module.description,
+              style: GoogleFonts.exo2(fontSize: 14, color: AppColors.taupe, height: 1.6, fontWeight: FontWeight.w500),
             ),
           ),
-          const SizedBox(height: 16),
-          ...List.generate(q.options.length, (i) {
-            final isSelected = _selectedAnswer == i;
-            return GestureDetector(
-              onTap: () => setState(() => _selectedAnswer = i),
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 200),
-                margin: const EdgeInsets.only(bottom: 10),
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                decoration: BoxDecoration(
-                  color: isSelected ? AppColors.plum : AppColors.ivory,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color: isSelected ? AppColors.plum : AppColors.plum.withAlpha(40),
-                  ),
-                ),
-                child: Row(
-                  children: [
-                    Container(
-                      width: 20,
-                      height: 20,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        border: Border.all(
-                          color: isSelected ? AppColors.ivory : AppColors.taupe,
-                          width: 2,
-                        ),
-                        color: isSelected ? AppColors.ivory : Colors.transparent,
-                      ),
-                      child: isSelected ? const Icon(Icons.check, size: 12, color: AppColors.plum) : null,
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Text(
-                        q.options[i],
-                        style: GoogleFonts.exo2(
-                          fontSize: 13,
-                          color: isSelected ? AppColors.ivory : AppColors.cranberry,
-                          fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
-                        ),
-                      ),
-                    ),
-                  ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSectionTitle(String title) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          title.toUpperCase(),
+          style: GoogleFonts.orbitron(fontSize: 14, fontWeight: FontWeight.w800, color: AppColors.cranberry, letterSpacing: 1.2),
+        ),
+        const SizedBox(height: 4),
+        Container(height: 3, width: 40, decoration: BoxDecoration(gradient: AppColors.primaryGradient, borderRadius: BorderRadius.circular(2))),
+      ],
+    );
+  }
+
+  Widget _buildLessonList(BuildContext context) {
+    if (module.lessons.isEmpty) {
+      return Text("Technical architecture pending. Content arriving soon.", 
+        style: GoogleFonts.exo2(color: AppColors.taupe, fontSize: 13));
+    }
+    return Column(
+      children: module.lessons.map((l) => Card(
+        margin: const EdgeInsets.only(bottom: 12),
+        elevation: 0,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16), side: BorderSide(color: AppColors.plum.withAlpha(15))),
+        child: ListTile(
+          leading: Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(color: AppColors.cranberry.withAlpha(10), shape: BoxShape.circle),
+            child: Text("${l.order + 1}", style: GoogleFonts.orbitron(fontSize: 10, fontWeight: FontWeight.bold, color: AppColors.cranberry)),
+          ),
+          title: Text(l.title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+          trailing: const Icon(Icons.play_circle_outline, color: AppColors.plum),
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => LessonViewScreen(
+                  module: module,
+                  lessonIndex: module.lessons.indexOf(l),
                 ),
               ),
             );
-          }),
-          const SizedBox(height: 20),
-          SizedBox(
-            width: double.infinity,
-            height: 48,
-            child: ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.cranberry,
-                foregroundColor: AppColors.ivory,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                elevation: 0,
-              ),
-              onPressed: _selectedAnswer == null ? null : _submitAnswer,
-              child: Text(
-                _currentQuestionIndex == widget.module.quiz.length - 1 ? 'Finish Quiz' : 'Next Question',
-                style: GoogleFonts.exo2(fontWeight: FontWeight.w700),
-              ),
+          },
+        ),
+      )).toList(),
+    );
+  }
+
+  Widget _buildFooterMeta() {
+    return Row(
+      children: [
+        Icon(Icons.history_edu_rounded, size: 14, color: AppColors.taupe.withAlpha(180)),
+        const SizedBox(width: 6),
+        Text(
+          'Architected on ${_formatDate(module.createdAt)}',
+          style: GoogleFonts.exo2(fontSize: 12, color: AppColors.taupe, fontWeight: FontWeight.w600),
+        ),
+      ],
+    );
+  }
+
+  String _formatDate(DateTime dt) {
+    return '${dt.day}/${dt.month}/${dt.year}';
+  }
+}
+
+class _QuizCTA extends StatelessWidget {
+  final LearningModule module;
+  const _QuizCTA({required this.module});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: AppColors.plum,
+        borderRadius: BorderRadius.circular(24),
+      ),
+      child: Column(
+        children: [
+          const Icon(Icons.assignment_turned_in_rounded, color: Colors.white, size: 32),
+          const SizedBox(height: 12),
+          Text(
+            'KNOWLEDGE CHECK',
+            style: GoogleFonts.orbitron(color: Colors.white, fontWeight: FontWeight.w900, fontSize: 14, letterSpacing: 1.5),
+          ),
+          const SizedBox(height: 24),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.white,
+              foregroundColor: AppColors.plum,
+              minimumSize: const Size(double.infinity, 50),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             ),
+            onPressed: () {}, 
+            child: const Text('START ASSESSMENT'),
           ),
         ],
       ),
@@ -442,18 +267,8 @@ class _Badge extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-      decoration: BoxDecoration(
-        color: color,
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Text(
-        label,
-        style: GoogleFonts.exo2(
-          fontSize: 11,
-          fontWeight: FontWeight.w600,
-          color: AppColors.ivory,
-        ),
-      ),
+      decoration: BoxDecoration(color: color, borderRadius: BorderRadius.circular(20)),
+      child: Text(label, style: GoogleFonts.exo2(fontSize: 10, fontWeight: FontWeight.w800, color: AppColors.ivory, letterSpacing: 0.5)),
     );
   }
 }

@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../theme/app_colors.dart';
-import '../theme/app_theme.dart';
 import '../widgets/custom_bottom_nav.dart';
 import '../widgets/tech_background_animation.dart';
 import '../services/auth_service.dart';
-
-import 'login_screen.dart';
+import '../models/user_model.dart';
+import 'learning/course_selection_screen.dart';
+import 'workshop_screen.dart';
+import 'profile_screen.dart';
+import 'leaderboard_screen.dart';
 
 class StudentHomeScreen extends StatefulWidget {
   const StudentHomeScreen({super.key});
@@ -16,80 +19,28 @@ class StudentHomeScreen extends StatefulWidget {
   State<StudentHomeScreen> createState() => _StudentHomeScreenState();
 }
 
-class _StudentHomeScreenState extends State<StudentHomeScreen>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _heroController;
-  late Animation<double> _heroFade;
-  late Animation<double> _heroSlide;
-
+class _StudentHomeScreenState extends State<StudentHomeScreen> with SingleTickerProviderStateMixin {
   int _selectedNavIndex = 0;
-  final _scrollController = ScrollController();
-
-  @override
-  void initState() {
-    super.initState();
-
-    _heroController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 700),
-    );
-
-    _heroFade = Tween<double>(begin: 0, end: 1).animate(
-      CurvedAnimation(parent: _heroController, curve: Curves.easeOut),
-    );
-
-    _heroSlide = Tween<double>(begin: 40, end: 0).animate(
-      CurvedAnimation(parent: _heroController, curve: Curves.easeOut),
-    );
-
-    _heroController.forward();
-  }
-
-  @override
-  void dispose() {
-    _heroController.dispose();
-    _scrollController.dispose();
-    super.dispose();
-  }
 
   void _onNavTap(int index) {
     setState(() => _selectedNavIndex = index);
   }
 
   Widget _getCurrentPage() {
-    if (_selectedNavIndex == 1) {
-      return const _SimpleStudentPage(
-        title: "Learning Materials",
-        subtitle: "Access robotics notes, modules, and learning resources.",
-        icon: Icons.menu_book_rounded,
-      );
-    } else if (_selectedNavIndex == 2) {
-      return const _SimpleStudentPage(
-        title: "Workshops",
-        subtitle: "View upcoming workshops and register for club activities.",
-        icon: Icons.calendar_month_rounded,
-      );
-    } else if (_selectedNavIndex == 3) {
-      return const _SimpleStudentPage(
-        title: "Profile",
-        subtitle: "View your account, learning progress, and registrations.",
-        icon: Icons.person_rounded,
-      );
+    switch (_selectedNavIndex) {
+      case 0:
+        return _HomeTab(onStartLearning: () => _onNavTap(1), onViewWorkshops: () => _onNavTap(3));
+      case 1:
+        return const CourseSelectionScreen();
+      case 2:
+        return const LeaderboardScreen();
+      case 3:
+        return const WorkshopScreen();
+      case 4:
+        return const ProfileScreen();
+      default:
+        return const Center(child: Text("Error: Tab not found"));
     }
-
-    return AnimatedBuilder(
-      animation: _heroController,
-      builder: (context, child) {
-        return Opacity(
-          opacity: _heroFade.value,
-          child: Transform.translate(
-            offset: Offset(0, _heroSlide.value),
-            child: child,
-          ),
-        );
-      },
-      child: const _HeroSection(),
-    );
   }
 
   @override
@@ -98,19 +49,9 @@ class _StudentHomeScreenState extends State<StudentHomeScreen>
       backgroundColor: AppColors.beige,
       body: Stack(
         children: [
-          const Positioned.fill(
-            child: TechBackgroundAnimation(),
-          ),
-          Column(
-            children: [
-              const _HomeHeader(),
-              Expanded(
-                child: SingleChildScrollView(
-                  controller: _scrollController,
-                  child: _getCurrentPage(),
-                ),
-              ),
-            ],
+          const Positioned.fill(child: TechBackgroundAnimation()),
+          SafeArea(
+            child: _getCurrentPage(),
           ),
         ],
       ),
@@ -122,386 +63,212 @@ class _StudentHomeScreenState extends State<StudentHomeScreen>
   }
 }
 
-class _HomeHeader extends StatelessWidget {
-  const _HomeHeader();
+class _HomeTab extends StatelessWidget {
+  final VoidCallback onStartLearning;
+  final VoidCallback onViewWorkshops;
 
-  Future<void> _logout(BuildContext context) async {
-    await AuthService().logout();
+  const _HomeTab({required this.onStartLearning, required this.onViewWorkshops});
 
-    if (!context.mounted) return;
+  @override
+  Widget build(BuildContext context) {
+    final user = AuthService().currentUser;
 
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(
-        builder: (_) => const LoginScreen(),
+    return SingleChildScrollView(
+      padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 20.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildUserHeader(user?.uid),
+          const SizedBox(height: 32),
+          _buildMainHero(context),
+          const SizedBox(height: 40),
+          _buildPlatformFeatures(),
+        ],
       ),
     );
   }
 
-  @override
-  Widget build(BuildContext context) {
-    final width = MediaQuery.of(context).size.width;
+  Widget _buildUserHeader(String? uid) {
+    return StreamBuilder<DocumentSnapshot>(
+      stream: FirebaseFirestore.instance.collection('users').doc(uid ?? '').snapshots(),
+      builder: (context, snapshot) {
+        final userData = snapshot.hasData && snapshot.data!.exists 
+          ? UserModel.fromMap(snapshot.data!.data() as Map<String, dynamic>)
+          : null;
 
-    return Container(
-      width: double.infinity,
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          colors: [AppColors.cranberry, AppColors.plum],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-      ),
-      child: SafeArea(
-        bottom: false,
-        child: Padding(
-          padding: EdgeInsets.symmetric(
-            horizontal: width < 400 ? 16 : 22,
-            vertical: 16,
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Flexible(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Welcome back,',
-                      style: GoogleFonts.exo2(
-                        fontSize: 13,
-                        color: AppColors.ivory.withAlpha(200),
-                        fontWeight: FontWeight.w400,
-                      ),
-                    ),
-                    Text(
-                      'RoboLearner',
-                      overflow: TextOverflow.ellipsis,
-                      style: GoogleFonts.orbitron(
-                        fontSize: width < 400 ? 18 : 22,
-                        fontWeight: FontWeight.w700,
-                        color: AppColors.ivory,
-                      ),
-                    ),
-                  ],
+        return Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'SYSTEM READY,',
+                  style: GoogleFonts.orbitron(
+                    fontSize: 12,
+                    color: AppColors.plum,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: 2,
+                  ),
                 ),
-              ),
-              Row(
-                children: [
-                  _HeaderIconButton(
-                    icon: Icons.notifications_outlined,
-                    onTap: () {},
+                const SizedBox(height: 4),
+                Text(
+                  userData?.name.split(' ').first.toUpperCase() ?? 'LEARNER',
+                  style: GoogleFonts.orbitron(
+                    fontSize: 32,
+                    fontWeight: FontWeight.w900,
+                    color: Colors.black87,
                   ),
-                  const SizedBox(width: 10),
-                  _HeaderIconButton(
-                    icon: Icons.logout,
-                    onTap: () => _logout(context),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-      ),
+                ),
+              ],
+            ),
+            if (userData != null) _UserRankBadge(xp: userData.totalXp, level: userData.level),
+          ],
+        );
+      },
     );
   }
-}
 
-class _HeaderIconButton extends StatelessWidget {
-  final IconData icon;
-  final VoidCallback onTap;
-
-  const _HeaderIconButton({
-    required this.icon,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: 44,
-        height: 44,
-        decoration: BoxDecoration(
-          color: AppColors.ivory.withAlpha(30),
-          borderRadius: BorderRadius.circular(14),
-        ),
-        child: Icon(
-          icon,
-          color: AppColors.ivory,
-          size: 22,
-        ),
-      ),
-    );
-  }
-}
-
-class _HeroSection extends StatelessWidget {
-  const _HeroSection();
-
-  @override
-  Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
-    final isSmallPhone = size.width < 380;
-
+  Widget _buildMainHero(BuildContext context) {
     return Container(
       width: double.infinity,
-      padding: EdgeInsets.symmetric(
-        horizontal: isSmallPhone ? 18 : 24,
-        vertical: size.height * 0.07,
+      padding: const EdgeInsets.symmetric(vertical: 48, horizontal: 32),
+      decoration: BoxDecoration(
+        color: AppColors.plum, // Deep maroon/plum
+        borderRadius: BorderRadius.circular(40),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.2),
+            blurRadius: 20,
+            offset: const Offset(0, 10),
+          ),
+        ],
       ),
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Wrap(
-            alignment: WrapAlignment.center,
-            crossAxisAlignment: WrapCrossAlignment.center,
-            spacing: 16,
-            runSpacing: 12,
-            children: [
-              Image.asset(
-                'assets/logo.png',
-                height: isSmallPhone ? 58 : 70,
-                errorBuilder: (context, error, stackTrace) {
-                  return const Icon(
-                    Icons.precision_manufacturing_rounded,
-                    color: AppColors.cranberry,
-                    size: 38,
-                  );
-                },
-              ),
-              Text(
-                'RoboLearn',
-                style: GoogleFonts.orbitron(
-                  fontSize: size.width > 600
-                      ? 56
-                      : isSmallPhone
-                      ? 34
-                      : 42,
-                  fontWeight: FontWeight.w700,
-                  color: AppColors.cranberry,
-                  letterSpacing: 1,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
+          const Icon(Icons.auto_awesome, color: Colors.white, size: 56),
+          const SizedBox(height: 28),
           Text(
-            'Al Jazari Innovation Hub',
-            style: GoogleFonts.exo2(
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-              color: AppColors.plum,
-              letterSpacing: 0.5,
+            "ARCHITECT THE FUTURE",
+            textAlign: TextAlign.center,
+            style: GoogleFonts.orbitron(
+              fontSize: 28,
+              fontWeight: FontWeight.w900,
+              color: Colors.white,
+              letterSpacing: 2,
             ),
           ),
           const SizedBox(height: 16),
-          ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 560),
-            child: Text(
-              'A clean, professional platform for robotics education at UTM. '
-                  'Learn robotics, join workshops, track your progress, and access club materials.',
-              textAlign: TextAlign.center,
-              style: GoogleFonts.exo2(
-                fontSize: isSmallPhone ? 13 : 15,
-                color: AppColors.taupe,
-                height: 1.65,
-              ),
-            ),
-          ),
-          const SizedBox(height: 36),
-          Wrap(
-            spacing: 16,
-            runSpacing: 12,
-            alignment: WrapAlignment.center,
-            children: [
-              _CTAButton(
-                label: 'Start Learning',
-                icon: Icons.rocket_launch_rounded,
-                filled: true,
-                onTap: () {},
-              ),
-              _CTAButton(
-                label: 'View Workshops',
-                icon: Icons.calendar_month_rounded,
-                filled: false,
-                onTap: () {},
-              ),
-            ],
-          ),
-          const SizedBox(height: 50),
-          const _PlatformFeaturesSection(),
-        ],
-      ),
-    );
-  }
-}
-
-class _CTAButton extends StatefulWidget {
-  final String label;
-  final IconData icon;
-  final bool filled;
-  final VoidCallback? onTap;
-
-  const _CTAButton({
-    required this.label,
-    required this.icon,
-    required this.filled,
-    this.onTap,
-  });
-
-  @override
-  State<_CTAButton> createState() => _CTAButtonState();
-}
-
-class _CTAButtonState extends State<_CTAButton> {
-  bool _hovered = false;
-
-  @override
-  Widget build(BuildContext context) {
-    return MouseRegion(
-      onEnter: (_) => setState(() => _hovered = true),
-      onExit: (_) => setState(() => _hovered = false),
-      cursor: widget.onTap != null
-          ? SystemMouseCursors.click
-          : SystemMouseCursors.basic,
-      child: GestureDetector(
-        onTap: widget.onTap,
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 200),
-          transform: Matrix4.identity()..scale(_hovered ? 1.04 : 1.0),
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
-          decoration: BoxDecoration(
-            color: widget.filled
-                ? (_hovered ? AppColors.plum : AppColors.cranberry)
-                : Colors.transparent,
-            borderRadius: BorderRadius.circular(AppTheme.radiusPill),
-            border: Border.all(
-              color: widget.filled ? Colors.transparent : AppColors.cranberry,
-              width: 2,
-            ),
-            boxShadow: widget.filled
-                ? [
-              BoxShadow(
-                color: AppColors.cranberry.withAlpha(
-                  _hovered ? 70 : 40,
-                ),
-                blurRadius: _hovered ? 20 : 12,
-                offset: const Offset(0, 6),
-              ),
-            ]
-                : null,
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                widget.icon,
-                size: 18,
-                color: widget.filled
-                    ? AppColors.ivory
-                    : (_hovered ? AppColors.plum : AppColors.cranberry),
-              ),
-              const SizedBox(width: 8),
-              Text(
-                widget.label,
-                style: GoogleFonts.exo2(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w600,
-                  color: widget.filled
-                      ? AppColors.ivory
-                      : (_hovered ? AppColors.plum : AppColors.cranberry),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _PlatformFeaturesSection extends StatelessWidget {
-  const _PlatformFeaturesSection();
-
-  static const _features = [
-    (
-    icon: Icons.menu_book_rounded,
-    title: 'Learning Modules',
-    desc: 'Structured robotics materials for beginners and advanced learners.',
-    color: AppColors.cranberry,
-    ),
-    (
-    icon: Icons.calendar_month_rounded,
-    title: 'Workshops',
-    desc: 'View and register for robotics workshops and club events.',
-    color: AppColors.plum,
-    ),
-    (
-    icon: Icons.build_rounded,
-    title: 'Equipment Booking',
-    desc: 'Check available lab tools and equipment booking information.',
-    color: Color(0xFF4A7C59),
-    ),
-    (
-    icon: Icons.trending_up_rounded,
-    title: 'Progress Tracking',
-    desc: 'Follow your learning progress and completed robotics activities.',
-    color: AppColors.taupe,
-    ),
-  ];
-
-  @override
-  Widget build(BuildContext context) {
-    final width = MediaQuery.of(context).size.width;
-
-    final crossAxisCount = width > 900
-        ? 4
-        : width > 600
-        ? 2
-        : 1;
-
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 20),
-      child: Column(
-        children: [
           Text(
-            'Student Features',
-            style: GoogleFonts.orbitron(
-              fontSize: width < 380 ? 22 : 28,
-              fontWeight: FontWeight.w700,
-              color: AppColors.cranberry,
-            ),
+            "Start your sequential journey from Arduino foundations to Advanced Robotics.",
             textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Everything you need to start your robotics journey',
             style: GoogleFonts.exo2(
-              fontSize: 14,
-              color: AppColors.taupe,
+              color: Colors.white.withOpacity(0.85),
+              fontSize: 16,
+              height: 1.5,
             ),
-            textAlign: TextAlign.center,
           ),
-          const SizedBox(height: 30),
-          GridView.count(
-            crossAxisCount: crossAxisCount,
-            crossAxisSpacing: 18,
-            mainAxisSpacing: 18,
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            childAspectRatio: width < 380 ? 1.35 : 1.15,
-            children: _features
-                .map(
-                  (feature) => _FeatureCard(
-                icon: feature.icon,
-                title: feature.title,
-                desc: feature.desc,
-                iconColor: feature.color,
+          const SizedBox(height: 40),
+          Row(
+            children: [
+              Expanded(
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.white,
+                    foregroundColor: AppColors.plum,
+                    padding: const EdgeInsets.symmetric(vertical: 18),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+                    elevation: 0,
+                  ),
+                  onPressed: onStartLearning,
+                  child: Text("LEARN", style: GoogleFonts.orbitron(fontWeight: FontWeight.w900, fontSize: 15)),
+                ),
               ),
-            )
-                .toList(),
+              const SizedBox(width: 16),
+              Expanded(
+                child: OutlinedButton(
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 18),
+                    side: BorderSide(color: Colors.white.withOpacity(0.4), width: 1.5),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+                  ),
+                  onPressed: onViewWorkshops,
+                  child: Text("HUB EVENTS", style: GoogleFonts.orbitron(fontWeight: FontWeight.w900, fontSize: 15)),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPlatformFeatures() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              "HUB PROTOCOLS",
+              style: GoogleFonts.orbitron(
+                fontSize: 16,
+                fontWeight: FontWeight.w900,
+                color: AppColors.plum,
+                letterSpacing: 1.5,
+              ),
+            ),
+            // Al-Jazari Club Logo
+            Image.asset('assets/logo.png', height: 45),
+          ],
+        ),
+        const SizedBox(height: 24),
+        _FeatureTile(
+          icon: Icons.lock_outline_rounded,
+          title: "Linear Progression",
+          subtitle: "Sequence-locked milestones ensure technical depth.",
+        ),
+        const SizedBox(height: 16),
+        _FeatureTile(
+          icon: Icons.workspace_premium_outlined,
+          title: "Validated Recognition",
+          subtitle: "Digital credentials issued upon technical mastery.",
+        ),
+      ],
+    );
+  }
+}
+
+class _UserRankBadge extends StatelessWidget {
+  final int xp;
+  final int level;
+  const _UserRankBadge({required this.xp, required this.level});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(28),
+        boxShadow: [
+          BoxShadow(color: Colors.black.withOpacity(0.06), blurRadius: 12, offset: const Offset(0, 4))
+        ],
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Icon(Icons.bolt, color: Colors.orange, size: 24),
+          const SizedBox(width: 10),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text("$xp XP", style: GoogleFonts.orbitron(fontSize: 14, fontWeight: FontWeight.w900, color: AppColors.plum)),
+              Text("LVL $level", style: GoogleFonts.orbitron(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.grey)),
+            ],
           ),
         ],
       ),
@@ -509,158 +276,47 @@ class _PlatformFeaturesSection extends StatelessWidget {
   }
 }
 
-class _FeatureCard extends StatefulWidget {
+class _FeatureTile extends StatelessWidget {
   final IconData icon;
-  final String title;
-  final String desc;
-  final Color iconColor;
-
-  const _FeatureCard({
-    required this.icon,
-    required this.title,
-    required this.desc,
-    required this.iconColor,
-  });
-
-  @override
-  State<_FeatureCard> createState() => _FeatureCardState();
-}
-
-class _FeatureCardState extends State<_FeatureCard> {
-  bool _hovered = false;
-
-  @override
-  Widget build(BuildContext context) {
-    return MouseRegion(
-      onEnter: (_) => setState(() => _hovered = true),
-      onExit: (_) => setState(() => _hovered = false),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 250),
-        transform: Matrix4.identity()..translate(0.0, _hovered ? -6.0 : 0.0),
-        padding: const EdgeInsets.all(22),
-        decoration: BoxDecoration(
-          color: AppColors.ivory,
-          borderRadius: BorderRadius.circular(AppTheme.radiusLarge),
-          border: Border.all(
-            color: _hovered
-                ? widget.iconColor.withAlpha(80)
-                : AppColors.plum.withAlpha(20),
-            width: 1.5,
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: widget.iconColor.withAlpha(_hovered ? 35 : 12),
-              blurRadius: _hovered ? 24 : 12,
-              offset: const Offset(0, 6),
-            ),
-          ],
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Container(
-              width: 50,
-              height: 50,
-              decoration: BoxDecoration(
-                color: widget.iconColor.withAlpha(18),
-                borderRadius: BorderRadius.circular(14),
-              ),
-              child: Icon(
-                widget.icon,
-                color: widget.iconColor,
-                size: 26,
-              ),
-            ),
-            const SizedBox(height: 16),
-            Text(
-              widget.title,
-              style: GoogleFonts.orbitron(
-                fontSize: 13,
-                fontWeight: FontWeight.w700,
-                color: AppColors.cranberry,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              widget.desc,
-              style: GoogleFonts.exo2(
-                fontSize: 12,
-                color: AppColors.taupe,
-                height: 1.6,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _SimpleStudentPage extends StatelessWidget {
   final String title;
   final String subtitle;
-  final IconData icon;
 
-  const _SimpleStudentPage({
+  const _FeatureTile({
+    required this.icon,
     required this.title,
     required this.subtitle,
-    required this.icon,
   });
 
   @override
   Widget build(BuildContext context) {
-    final width = MediaQuery.of(context).size.width;
-
-    return Padding(
-      padding: EdgeInsets.symmetric(
-        horizontal: width < 400 ? 18 : 24,
-        vertical: 70,
+    return Container(
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(28),
+        boxShadow: [
+          BoxShadow(color: Colors.black.withOpacity(0.03), blurRadius: 8, offset: const Offset(0, 4))
+        ],
       ),
-      child: Center(
-        child: Container(
-          constraints: const BoxConstraints(maxWidth: 500),
-          padding: const EdgeInsets.all(28),
-          decoration: BoxDecoration(
-            color: AppColors.ivory,
-            borderRadius: BorderRadius.circular(AppTheme.radiusLarge),
-            boxShadow: [
-              BoxShadow(
-                color: AppColors.cranberry.withAlpha(25),
-                blurRadius: 20,
-                offset: const Offset(0, 8),
-              ),
-            ],
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(color: AppColors.beige, borderRadius: BorderRadius.circular(20)),
+            child: Icon(icon, color: AppColors.plum, size: 30),
           ),
-          child: Column(
-            children: [
-              Icon(
-                icon,
-                size: 52,
-                color: AppColors.cranberry,
-              ),
-              const SizedBox(height: 18),
-              Text(
-                title,
-                style: GoogleFonts.orbitron(
-                  fontSize: width < 400 ? 20 : 24,
-                  fontWeight: FontWeight.w700,
-                  color: AppColors.cranberry,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 12),
-              Text(
-                subtitle,
-                style: GoogleFonts.exo2(
-                  fontSize: 14,
-                  color: AppColors.taupe,
-                  height: 1.5,
-                ),
-                textAlign: TextAlign.center,
-              ),
-            ],
+          const SizedBox(width: 20),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(title, style: GoogleFonts.orbitron(fontSize: 15, fontWeight: FontWeight.w900, color: AppColors.plum)),
+                const SizedBox(height: 4),
+                Text(subtitle, style: GoogleFonts.exo2(fontSize: 13, color: Colors.grey, height: 1.4)),
+              ],
+            ),
           ),
-        ),
+        ],
       ),
     );
   }

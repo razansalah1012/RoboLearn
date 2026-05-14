@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import '../theme/app_colors.dart';
-import '../theme/app_theme.dart';
 import '../widgets/tech_background_animation.dart';
 import '../widgets/animated_interactive_card.dart';
 import 'home_screen.dart';
 import 'committee_dashboard.dart';
+import 'admin_home_screen.dart';
 import '../services/auth_service.dart';
 
 class SignUpScreen extends StatefulWidget {
@@ -20,9 +20,12 @@ class _SignUpScreenState extends State<SignUpScreen>
   late Animation<double> _fadeAnimation;
   late Animation<double> _translateAnimation;
 
+  final _formKey = GlobalKey<FormState>();
   final TextEditingController nameController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
+  final TextEditingController matricController = TextEditingController();
+  final TextEditingController phoneController = TextEditingController();
   final AuthService authService = AuthService();
 
   String _selectedRole = 'student';
@@ -31,7 +34,6 @@ class _SignUpScreenState extends State<SignUpScreen>
   @override
   void initState() {
     super.initState();
-    // Page Load Animations: 0.6s ease transition
     _fadeController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 600),
@@ -53,7 +55,63 @@ class _SignUpScreenState extends State<SignUpScreen>
   @override
   void dispose() {
     _fadeController.dispose();
+    nameController.dispose();
+    emailController.dispose();
+    passwordController.dispose();
+    matricController.dispose();
+    phoneController.dispose();
     super.dispose();
+  }
+
+  void _handleSignUp() async {
+    if (_formKey.currentState!.validate()) {
+      setState(() => _isLoading = true);
+      
+      final result = await authService.signUp(
+        email: emailController.text.trim(),
+        password: passwordController.text.trim(),
+        name: nameController.text.trim(),
+        role: _selectedRole,
+        matricNumber: matricController.text.trim().isEmpty ? null : matricController.text.trim(),
+        phoneNumber: phoneController.text.trim().isEmpty ? null : phoneController.text.trim(),
+      );
+
+      if (result == null) {
+        // Success
+        if (_selectedRole == 'committee') {
+          // Committee members require approval
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text("Registration successful! Your committee account is pending admin approval."),
+              backgroundColor: Colors.orange,
+            ),
+          );
+          Navigator.pop(context); // Go back to login
+        } else {
+          // Redirect based on role
+          Widget nextScreen;
+          if (_selectedRole == 'admin') {
+            nextScreen = const AdminHomeScreen();
+          } else {
+            nextScreen = const HomeScreen();
+          }
+          
+          Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(builder: (context) => nextScreen),
+            (route) => false,
+          );
+        }
+      } else {
+        setState(() => _isLoading = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(result),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 
   @override
@@ -64,10 +122,7 @@ class _SignUpScreenState extends State<SignUpScreen>
       backgroundColor: AppColors.beige,
       body: Stack(
         children: [
-          // Background Animation
           const Positioned.fill(child: TechBackgroundAnimation()),
-
-          // Main Content
           SafeArea(
             child: Center(
               child: SingleChildScrollView(
@@ -87,197 +142,150 @@ class _SignUpScreenState extends State<SignUpScreen>
                     );
                   },
                   child: Container(
-                    constraints: const BoxConstraints(maxWidth: 450),
+                    constraints: const BoxConstraints(maxWidth: 500),
                     child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        // 🔷 App Logo area
-                        Center(
-                          child: Image.asset(
-                            'assets/logo.png',
-                            height: 80,
-                            errorBuilder: (context, error, stackTrace) {
-                              return Text(
-                                "RoboLearn",
-                                style: theme.textTheme.displaySmall,
-                              );
-                            },
-                          ),
-                        ),
-                        const SizedBox(height: 12),
                         Center(
                           child: Text(
-                            "Create Account",
+                            "RoboLearn",
                             style: theme.textTheme.displaySmall,
                           ),
                         ),
                         const SizedBox(height: 8),
                         Center(
                           child: Text(
-                            "Sign up to get started",
+                            "Create Your Account",
                             style: theme.textTheme.bodyLarge,
                           ),
                         ),
-                        const SizedBox(height: 40),
-
-                        // Form Encapsulated inside Animated Interactive Card
+                        const SizedBox(height: 30),
                         AnimatedInteractiveCard(
-                          padding: const EdgeInsets.all(30.0),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: [
-                              Text(
-                                "Registration",
-                                style: theme.textTheme.titleLarge,
-                                textAlign: TextAlign.center,
-                              ),
-                              const SizedBox(height: 24),
-
-                              // 👤 Name Field
-                              TextField(
-                                controller: nameController,
-                                decoration: InputDecoration(
-                                  labelText: "Name",
-                                  prefixIcon: const Icon(Icons.person_outline),
+                          padding: const EdgeInsets.all(24.0),
+                          child: Form(
+                            key: _formKey,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                Text(
+                                  "Registration Details",
+                                  style: theme.textTheme.titleLarge,
+                                  textAlign: TextAlign.center,
                                 ),
-                              ),
-                              const SizedBox(height: 20),
-
-                              // 📧 Email Field
-                              TextField(
-                                controller: emailController,
-                                decoration: InputDecoration(
-                                  labelText: "Email",
-                                  prefixIcon: const Icon(Icons.email_outlined),
-                                ),
-                              ),
-                              const SizedBox(height: 20),
-
-                              // 🔒 Password Field
-                              TextField(
-                                controller: passwordController,
-                                obscureText: true,
-                                decoration: InputDecoration(
-                                  labelText: "Password",
-                                  prefixIcon: const Icon(Icons.lock_outline),
-                                ),
-                              ),
-                              const SizedBox(height: 20),
-
-                              // 🎭 Role Selection
-                              DropdownButtonFormField<String>(
-                                value: _selectedRole,
-                                decoration: InputDecoration(
-                                  labelText: "Role",
-                                  prefixIcon: const Icon(Icons.badge_outlined),
-                                ),
-                                items: const [
-                                  DropdownMenuItem(
-                                    value: 'student',
-                                    child: Text("Student"),
+                                const SizedBox(height: 24),
+                                
+                                // Name
+                                TextFormField(
+                                  controller: nameController,
+                                  decoration: const InputDecoration(
+                                    labelText: "Full Name",
+                                    prefixIcon: Icon(Icons.person_outline),
                                   ),
-                                  DropdownMenuItem(
-                                    value: 'committee',
-                                    child: Text("Committee Member"),
+                                  validator: (value) => value == null || value.isEmpty ? "Required" : null,
+                                ),
+                                const SizedBox(height: 16),
+
+                                // Email
+                                TextFormField(
+                                  controller: emailController,
+                                  decoration: const InputDecoration(
+                                    labelText: "Email Address",
+                                    prefixIcon: Icon(Icons.email_outlined),
                                   ),
-                                ],
-                                onChanged: (value) {
-                                  if (value != null) {
-                                    setState(() => _selectedRole = value);
-                                  }
-                                },
-                              ),
-                              const SizedBox(height: 32),
+                                  keyboardType: TextInputType.emailAddress,
+                                  validator: (value) {
+                                    if (value == null || value.isEmpty) return "Required";
+                                    if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
+                                      return "Invalid email format";
+                                    }
+                                    return null;
+                                  },
+                                ),
+                                const SizedBox(height: 16),
 
-                              // 🔘 Sign Up Button
-                              ElevatedButton(
-                                onPressed: _isLoading
-                                    ? null
-                                    : () async {
-                                        setState(() => _isLoading = true);
-                                        String name = nameController.text.trim();
-                                        String email = emailController.text.trim();
-                                        String password = passwordController.text.trim();
+                                // Password
+                                TextFormField(
+                                  controller: passwordController,
+                                  obscureText: true,
+                                  decoration: const InputDecoration(
+                                    labelText: "Password",
+                                    prefixIcon: Icon(Icons.lock_outline),
+                                  ),
+                                  validator: (value) {
+                                    if (value == null || value.isEmpty) return "Required";
+                                    if (value.length < 6) return "Password must be at least 6 characters";
+                                    return null;
+                                  },
+                                ),
+                                const SizedBox(height: 16),
 
-                                        final user = await authService.signUp(
-                                          email: email,
-                                          password: password,
-                                          name: name,
-                                          role: _selectedRole,
-                                        );
+                                // Phone Number
+                                TextFormField(
+                                  controller: phoneController,
+                                  decoration: const InputDecoration(
+                                    labelText: "Phone Number",
+                                    prefixIcon: Icon(Icons.phone_outlined),
+                                  ),
+                                  keyboardType: TextInputType.phone,
+                                  validator: (value) => value == null || value.isEmpty ? "Required" : null,
+                                ),
+                                const SizedBox(height: 16),
 
-                                        if (user != null) {
-                                          if (_selectedRole == 'committee') {
-                                            Navigator.pushReplacement(
-                                              context,
-                                              MaterialPageRoute(
-                                                builder: (context) =>
-                                                    const CommitteeDashboard(),
-                                              ),
-                                            );
-                                          } else {
-                                            Navigator.pushReplacement(
-                                              context,
-                                              MaterialPageRoute(
-                                                builder: (context) =>
-                                                    const HomeScreen(),
-                                              ),
-                                            );
-                                          }
-                                        } else {
-                                          setState(() => _isLoading = false);
-                                          ScaffoldMessenger.of(context).showSnackBar(
-                                            const SnackBar(
-                                              content: Text("Sign Up Failed. Try again."),
-                                              backgroundColor: Colors.red,
-                                            ),
-                                          );
-                                        }
-                                      },
-                                child: _isLoading
-                                    ? const SizedBox(
-                                        height: 20,
-                                        width: 20,
-                                        child: CircularProgressIndicator(
-                                          strokeWidth: 2,
-                                          color: Colors.white,
-                                        ),
-                                      )
-                                    : const Text("SIGN UP"),
-                              ),
-                            ],
+                                // Matric Number
+                                TextFormField(
+                                  controller: matricController,
+                                  decoration: const InputDecoration(
+                                    labelText: "Matric Number (Optional for Admin)",
+                                    prefixIcon: Icon(Icons.assignment_ind_outlined),
+                                  ),
+                                ),
+                                const SizedBox(height: 16),
+
+                                // Role Selection
+                                DropdownButtonFormField<String>(
+                                  value: _selectedRole,
+                                  decoration: const InputDecoration(
+                                    labelText: "Role",
+                                    prefixIcon: Icon(Icons.badge_outlined),
+                                  ),
+                                  items: const [
+                                    DropdownMenuItem(value: 'student', child: Text("Student")),
+                                    DropdownMenuItem(value: 'committee', child: Text("Committee Member")),
+                                    DropdownMenuItem(value: 'admin', child: Text("Admin")),
+                                  ],
+                                  onChanged: (value) {
+                                    if (value != null) {
+                                      setState(() => _selectedRole = value);
+                                    }
+                                  },
+                                ),
+                                const SizedBox(height: 32),
+
+                                ElevatedButton(
+                                  onPressed: _isLoading ? null : _handleSignUp,
+                                  child: _isLoading
+                                      ? const SizedBox(
+                                          height: 20,
+                                          width: 20,
+                                          child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                                        )
+                                      : const Text("REGISTER"),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
                         const SizedBox(height: 30),
-
-                        // 🧾 Login Options
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Text(
-                              "Already have an account? ",
-                              style: theme.textTheme.bodyMedium,
-                            ),
+                            Text("Already have an account? ", style: theme.textTheme.bodyMedium),
                             TextButton(
-                              style: TextButton.styleFrom(
-                                padding: EdgeInsets.zero,
-                                minimumSize: Size.zero,
-                                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                              ),
-                              onPressed: () {
-                                Navigator.pop(context);
-                              },
-                              child: Text(
-                                "Login",
-                                style: theme.textTheme.labelLarge?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
+                              onPressed: () => Navigator.pop(context),
+                              child: Text("Login", style: theme.textTheme.labelLarge?.copyWith(fontWeight: FontWeight.bold)),
                             ),
                           ],
                         ),
-                        const SizedBox(height: 20),
                       ],
                     ),
                   ),

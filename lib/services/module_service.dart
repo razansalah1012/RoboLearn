@@ -3,7 +3,8 @@ import '../models/learning_module_model.dart';
 
 class ModuleService {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
-  static const _col = 'learning_modules';
+  // Unified with CourseService to avoid split collection issues
+  static const _col = 'modules';
 
   /// Stream all modules ordered by creation date (newest first)
   Stream<List<LearningModule>> getModulesStream() {

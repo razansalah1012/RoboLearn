@@ -18,6 +18,7 @@ class CustomBottomNavBar extends StatelessWidget {
     const items = [
       (icon: Icons.home_rounded, label: 'Home'),
       (icon: Icons.menu_book_rounded, label: 'Learn'),
+      (icon: Icons.leaderboard_rounded, label: 'Rank'),
       (icon: Icons.calendar_month_rounded, label: 'Workshops'),
       (icon: Icons.person_outline_rounded, label: 'Profile'),
     ];
@@ -49,7 +50,7 @@ class CustomBottomNavBar extends StatelessWidget {
                 behavior: HitTestBehavior.opaque,
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 200),
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                   decoration: BoxDecoration(
                     color: isSelected
                         ? AppColors.cranberry.withAlpha(15)
@@ -68,7 +69,7 @@ class CustomBottomNavBar extends StatelessWidget {
                       Text(
                         items[i].label,
                         style: GoogleFonts.exo2(
-                          fontSize: 11,
+                          fontSize: 10,
                           fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
                           color: isSelected ? AppColors.cranberry : AppColors.taupe,
                         ),
