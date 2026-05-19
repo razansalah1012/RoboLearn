@@ -13,6 +13,7 @@ import 'login_screen.dart';
 import 'admin/course_editor_screen.dart';
 import 'committee/committee_profile_screen.dart';
 import 'committee/committee_directory_screen.dart';
+import 'committee/sponsorship_management_screen.dart';
 import '../widgets/placeholder_screen.dart';
 
 class CommitteeDashboard extends StatefulWidget {
@@ -199,6 +200,11 @@ class _CommitteeDashboardState extends State<CommitteeDashboard>
             leading: const Icon(Icons.contacts_outlined),
             title: const Text("Committee Directory"),
             onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const CommitteeDirectoryScreen())),
+          ),
+          ListTile(
+            leading: const Icon(Icons.monetization_on_outlined),
+            title: const Text("Sponsorships"),
+            onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const SponsorshipManagementScreen())),
           ),
           const Divider(),
           ListTile(
