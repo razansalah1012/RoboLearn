@@ -20,6 +20,7 @@ class CustomBottomNavBar extends StatelessWidget {
       (icon: Icons.menu_book_rounded, label: 'Learn'),
       (icon: Icons.leaderboard_rounded, label: 'Rank'),
       (icon: Icons.calendar_month_rounded, label: 'Workshops'),
+      (icon: Icons.rate_review_rounded, label: 'Feedback'),
       (icon: Icons.person_outline_rounded, label: 'Profile'),
     ];
 
