@@ -19,79 +19,122 @@ class ModuleDetailScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final _courseService = CourseService();
+    final courseService = CourseService();
 
     return Scaffold(
       backgroundColor: AppColors.beige,
-      appBar: AppBar(
-        title: Text(module.title, style: GoogleFonts.orbitron(fontSize: 16)),
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        foregroundColor: AppColors.cranberry,
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(24),
+      body: SafeArea(
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              module.description,
-              style: GoogleFonts.exo2(fontSize: 15, color: AppColors.taupe),
-            ),
-            const SizedBox(height: 30),
-            Text(
-              "Curriculum",
-              style: GoogleFonts.orbitron(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.cranberry),
-            ),
-            const SizedBox(height: 16),
-            ListView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: module.lessons.length,
-              itemBuilder: (context, index) {
-                final lesson = module.lessons[index];
-                final isUnlocked = _courseService.isLessonUnlocked(lesson, module, progress);
-                final isCompleted = progress?.completedLessonIds.contains(lesson.id) ?? false;
+            _buildHeader(context),
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      module.description,
+                      style: GoogleFonts.exo2(fontSize: 15, color: AppColors.taupe),
+                    ),
+                    const SizedBox(height: 30),
+                    Text(
+                      "CURRICULUM",
+                      style: GoogleFonts.orbitron(
+                        fontSize: 16, 
+                        fontWeight: FontWeight.bold, 
+                        color: AppColors.cranberry,
+                        letterSpacing: 1,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    ListView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemCount: module.lessons.length,
+                      itemBuilder: (context, index) {
+                        final lesson = module.lessons[index];
+                        final isUnlocked = courseService.isLessonUnlocked(lesson, module, progress);
+                        final isCompleted = progress?.completedLessonIds.contains(lesson.id) ?? false;
 
-                return _LessonTile(
-                  lesson: lesson,
-                  index: index,
-                  isUnlocked: isUnlocked,
-                  isCompleted: isCompleted,
-                  onTap: () {
-                    if (isUnlocked) {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => LessonViewScreen(
-                            module: module,
-                            lessonIndex: index,
-                            progress: progress,
-                          ),
-                        ),
-                      );
-                    } else {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text("Complete previous lessons to unlock!")),
-                      );
-                    }
-                  },
-                );
-              },
-            ),
-            const SizedBox(height: 30),
-            _QuizActionCard(
-              module: module,
-              isUnlocked: module.lessons.every((l) => progress?.completedLessonIds.contains(l.id) ?? false),
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => QuizScreen(module: module)),
-                );
-              },
+                        return _LessonTile(
+                          lesson: lesson,
+                          index: index,
+                          isUnlocked: isUnlocked,
+                          isCompleted: isCompleted,
+                          onTap: () {
+                            if (isUnlocked) {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => LessonViewScreen(
+                                    module: module,
+                                    lessonIndex: index,
+                                    progress: progress,
+                                  ),
+                                ),
+                              );
+                            } else {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(content: Text("Complete previous lessons to unlock!")),
+                              );
+                            }
+                          },
+                        );
+                      },
+                    ),
+                    const SizedBox(height: 30),
+                    _QuizActionCard(
+                      module: module,
+                      isUnlocked: module.lessons.isNotEmpty && 
+                        module.lessons.every((l) => progress?.completedLessonIds.contains(l.id) ?? false),
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => QuizScreen(module: module)),
+                        );
+                      },
+                    ),
+                  ],
+                ),
+              ),
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildHeader(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.fromLTRB(16, 10, 24, 10),
+      decoration: const BoxDecoration(
+        color: AppColors.cranberry,
+        borderRadius: BorderRadius.only(
+          bottomLeft: Radius.circular(24),
+          bottomRight: Radius.circular(24),
+        ),
+      ),
+      child: Row(
+        children: [
+          IconButton(
+            icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white, size: 20),
+            onPressed: () => Navigator.pop(context),
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              module.title.toUpperCase(),
+              style: GoogleFonts.orbitron(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+                letterSpacing: 1,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -119,7 +162,7 @@ class _LessonTile extends StatelessWidget {
       elevation: 0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
-        side: BorderSide(color: isUnlocked ? AppColors.cranberry.withOpacity(0.2) : Colors.grey.shade300),
+        side: BorderSide(color: isUnlocked ? AppColors.cranberry.withAlpha(50) : Colors.grey.shade300),
       ),
       child: ListTile(
         onTap: onTap,
@@ -167,8 +210,8 @@ class _QuizActionCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  "Final Assessment",
-                  style: GoogleFonts.orbitron(color: Colors.white, fontWeight: FontWeight.bold),
+                  "FINAL ASSESSMENT",
+                  style: GoogleFonts.orbitron(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14),
                 ),
                 Text(
                   "Prove your mastery of ${module.title}",
@@ -178,8 +221,13 @@ class _QuizActionCard extends StatelessWidget {
             ),
           ),
           ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.white,
+              foregroundColor: AppColors.plum,
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+            ),
             onPressed: isUnlocked ? onTap : null,
-            child: const Text("Start"),
+            child: const Text("START"),
           ),
         ],
       ),

@@ -6,7 +6,7 @@ class AppTheme {
   // Border Radius Constants
   static const double radiusSmall = 8.0;
   static const double radiusMedium = 16.0;
-  static const double radiusLarge = 24.0;
+  static const double radiusLarge = 32.0; // Optimized for rounded headers
   static const double radiusPill = 50.0;
 
   static ThemeData get lightTheme {
@@ -32,7 +32,7 @@ class AppTheme {
       textTheme: TextTheme(
         // Hero Title
         displayLarge: GoogleFonts.orbitron(
-          fontSize: 48, // Responsive size will be handled in widgets
+          fontSize: 48,
           fontWeight: FontWeight.w700,
           color: AppColors.cranberry,
         ),

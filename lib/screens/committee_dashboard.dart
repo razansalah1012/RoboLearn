@@ -14,6 +14,7 @@ import 'admin/course_editor_screen.dart';
 import 'committee/committee_profile_screen.dart';
 import 'committee/committee_directory_screen.dart';
 import 'committee/sponsorship_management_screen.dart';
+import 'committee/workshop_management_screen.dart';
 import '../widgets/placeholder_screen.dart';
 
 class CommitteeDashboard extends StatefulWidget {
@@ -208,9 +209,9 @@ class _CommitteeDashboardState extends State<CommitteeDashboard>
           ),
           const Divider(),
           ListTile(
-            leading: const Icon(Icons.event_outlined),
-            title: const Text("Events"),
-            onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const PlaceholderScreen(title: "Events", icon: Icons.event))),
+            leading: const Icon(Icons.event_available_outlined),
+            title: const Text("Workshop Management"),
+            onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const WorkshopManagementScreen())),
           ),
           ListTile(
             leading: const Icon(Icons.build_outlined),
@@ -269,6 +270,14 @@ class _OverviewTab extends StatelessWidget {
                     value: courseCount.toString(),
                     icon: Icons.architecture_rounded,
                     color: AppColors.plum,
+                  ),
+                  const SizedBox(height: 16),
+                  _StatCard(
+                    title: 'Workshop Management',
+                    value: 'MANAGE',
+                    icon: Icons.handyman_rounded,
+                    color: AppColors.cranberry,
+                    onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const WorkshopManagementScreen())),
                   ),
                   const SizedBox(height: 16),
                   _StatCard(
@@ -399,12 +408,21 @@ class _StatCard extends StatelessWidget {
   final String title, value;
   final IconData icon;
   final Color color;
-  const _StatCard({required this.title, required this.value, required this.icon, required this.color});
+  final VoidCallback? onTap;
+
+  const _StatCard({
+    required this.title, 
+    required this.value, 
+    required this.icon, 
+    required this.color,
+    this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
     return AnimatedInteractiveCard(
       padding: const EdgeInsets.all(20),
+      onTap: onTap,
       child: Row(
         children: [
           Container(
@@ -413,13 +431,16 @@ class _StatCard extends StatelessWidget {
             child: Icon(icon, color: color, size: 28),
           ),
           const SizedBox(width: 20),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(value, style: GoogleFonts.orbitron(fontSize: 24, fontWeight: FontWeight.bold, color: AppColors.cranberry)),
-              Text(title, style: GoogleFonts.exo2(fontSize: 13, color: AppColors.taupe)),
-            ],
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(value, style: GoogleFonts.orbitron(fontSize: 24, fontWeight: FontWeight.bold, color: AppColors.cranberry)),
+                Text(title, style: GoogleFonts.exo2(fontSize: 13, color: AppColors.taupe)),
+              ],
+            ),
           ),
+          if (onTap != null) const Icon(Icons.chevron_right, color: AppColors.taupe),
         ],
       ),
     );

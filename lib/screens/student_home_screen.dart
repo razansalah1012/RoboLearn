@@ -49,7 +49,12 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> with SingleTicker
       backgroundColor: AppColors.beige,
       body: Stack(
         children: [
-          const Positioned.fill(child: TechBackgroundAnimation()),
+          // Animation ONLY shown when on the Home tab (index 0)
+          if (_selectedNavIndex == 0)
+            const Positioned.fill(
+              key: ValueKey('home_bg_anim'),
+              child: TechBackgroundAnimation(),
+            ),
           SafeArea(
             child: _getCurrentPage(),
           ),
@@ -74,15 +79,22 @@ class _HomeTab extends StatelessWidget {
     final user = AuthService().currentUser;
 
     return SingleChildScrollView(
-      padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 20.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _buildUserHeader(user?.uid),
-          const SizedBox(height: 32),
-          _buildMainHero(context),
-          const SizedBox(height: 40),
-          _buildPlatformFeatures(),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 20.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(height: 12),
+                _buildMainHero(context),
+                const SizedBox(height: 40),
+                _buildPlatformFeatures(),
+              ],
+            ),
+          ),
         ],
       ),
     );
@@ -96,35 +108,46 @@ class _HomeTab extends StatelessWidget {
           ? UserModel.fromMap(snapshot.data!.data() as Map<String, dynamic>)
           : null;
 
-        return Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'SYSTEM READY,',
-                  style: GoogleFonts.orbitron(
-                    fontSize: 12,
-                    color: AppColors.plum,
-                    fontWeight: FontWeight.w900,
-                    letterSpacing: 2,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  userData?.name.split(' ').first.toUpperCase() ?? 'LEARNER',
-                  style: GoogleFonts.orbitron(
-                    fontSize: 32,
-                    fontWeight: FontWeight.w900,
-                    color: Colors.black87,
-                  ),
-                ),
-              ],
+        return Container(
+          width: double.infinity,
+          padding: const EdgeInsets.fromLTRB(24, 10, 24, 10),
+          decoration: const BoxDecoration(
+            color: AppColors.cranberry,
+            borderRadius: BorderRadius.only(
+              bottomLeft: Radius.circular(24),
+              bottomRight: Radius.circular(24),
             ),
-            if (userData != null) _UserRankBadge(xp: userData.totalXp, level: userData.level),
-          ],
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'LOCKED IN,',
+                    style: GoogleFonts.orbitron(
+                      fontSize: 10,
+                      color: Colors.white70,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: 2,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    userData?.name.split(' ').first.toUpperCase() ?? 'LEARNER',
+                    style: GoogleFonts.orbitron(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w900,
+                      color: Colors.white,
+                    ),
+                  ),
+                ],
+              ),
+              if (userData != null) _UserRankBadge(xp: userData.totalXp, level: userData.level),
+            ],
+          ),
         );
       },
     );
@@ -135,7 +158,7 @@ class _HomeTab extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.symmetric(vertical: 48, horizontal: 32),
       decoration: BoxDecoration(
-        color: AppColors.plum, // Deep maroon/plum
+        color: AppColors.plum,
         borderRadius: BorderRadius.circular(40),
         boxShadow: [
           BoxShadow(
@@ -161,7 +184,7 @@ class _HomeTab extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           Text(
-            "Start your sequential journey from Arduino foundations to Advanced Robotics.",
+            "Start your sequential journey from Arduino foundations to Advanced Robotics. By al jazari club",
             textAlign: TextAlign.center,
             style: GoogleFonts.exo2(
               color: Colors.white.withOpacity(0.85),
@@ -182,10 +205,12 @@ class _HomeTab extends StatelessWidget {
                     elevation: 0,
                   ),
                   onPressed: onStartLearning,
-                  child: Text("LEARN", style: GoogleFonts.orbitron(fontWeight: FontWeight.w900, fontSize: 15)),
+                  child: FittedBox(
+                    child: Text("LEARN", style: GoogleFonts.orbitron(fontWeight: FontWeight.w900, fontSize: 15)),
+                  ),
                 ),
               ),
-              const SizedBox(width: 16),
+              const SizedBox(width: 20),
               Expanded(
                 child: OutlinedButton(
                   style: OutlinedButton.styleFrom(
@@ -195,7 +220,13 @@ class _HomeTab extends StatelessWidget {
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
                   ),
                   onPressed: onViewWorkshops,
-                  child: Text("HUB EVENTS", style: GoogleFonts.orbitron(fontWeight: FontWeight.w900, fontSize: 15)),
+                  child: FittedBox(
+                    child: Text(
+                      "EVENTS",
+                      textAlign: TextAlign.center,
+                      style: GoogleFonts.orbitron(fontWeight: FontWeight.w900, fontSize: 15)
+                    ),
+                  ),
                 ),
               ),
             ],
@@ -212,30 +243,19 @@ class _HomeTab extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(
-              "HUB PROTOCOLS",
-              style: GoogleFonts.orbitron(
-                fontSize: 16,
-                fontWeight: FontWeight.w900,
-                color: AppColors.plum,
-                letterSpacing: 1.5,
+            Expanded(
+              child: Text(
+                "CONTINUE FROM WHERE YOU LEFT",
+                textAlign: TextAlign.center,
+                style: GoogleFonts.orbitron(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w900,
+                  color: AppColors.plum,
+                  letterSpacing: 1,
+                ),
               ),
             ),
-            // Al-Jazari Club Logo
-            Image.asset('assets/logo.png', height: 45),
           ],
-        ),
-        const SizedBox(height: 24),
-        _FeatureTile(
-          icon: Icons.lock_outline_rounded,
-          title: "Linear Progression",
-          subtitle: "Sequence-locked milestones ensure technical depth.",
-        ),
-        const SizedBox(height: 16),
-        _FeatureTile(
-          icon: Icons.workspace_premium_outlined,
-          title: "Validated Recognition",
-          subtitle: "Digital credentials issued upon technical mastery.",
         ),
       ],
     );
@@ -250,10 +270,10 @@ class _UserRankBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(28),
+        borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(color: Colors.black.withOpacity(0.06), blurRadius: 12, offset: const Offset(0, 4))
         ],
@@ -261,13 +281,14 @@ class _UserRankBadge extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Icon(Icons.bolt, color: Colors.orange, size: 24),
-          const SizedBox(width: 10),
+          const Icon(Icons.bolt, color: Colors.orange, size: 20),
+          const SizedBox(width: 8),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
             children: [
-              Text("$xp XP", style: GoogleFonts.orbitron(fontSize: 14, fontWeight: FontWeight.w900, color: AppColors.plum)),
-              Text("LVL $level", style: GoogleFonts.orbitron(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.grey)),
+              Text("$xp XP", style: GoogleFonts.orbitron(fontSize: 12, fontWeight: FontWeight.w900, color: AppColors.plum)),
+              Text("LVL $level", style: GoogleFonts.orbitron(fontSize: 9, fontWeight: FontWeight.bold, color: Colors.grey)),
             ],
           ),
         ],

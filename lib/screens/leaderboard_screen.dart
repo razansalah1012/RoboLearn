@@ -3,7 +3,6 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/user_model.dart';
 import '../theme/app_colors.dart';
-import '../theme/app_theme.dart';
 
 class LeaderboardScreen extends StatefulWidget {
   const LeaderboardScreen({super.key});
@@ -32,7 +31,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> with SingleTicker
           Expanded(
             child: TabBarView(
               controller: _tabController,
-              children: [
+              children: const [
                 _LeaderboardList(filterByXP: true), // All Time
                 _LeaderboardList(filterByXP: false), // Top Graduates
               ],
@@ -45,29 +44,37 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> with SingleTicker
 
   Widget _buildHeader() {
     return Container(
-      padding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
+      width: double.infinity,
+      padding: const EdgeInsets.fromLTRB(24, 12, 24, 12),
+      decoration: const BoxDecoration(
+        color: AppColors.cranberry,
+        borderRadius: BorderRadius.only(
+          bottomLeft: Radius.circular(32),
+          bottomRight: Radius.circular(32),
+        ),
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              const Icon(Icons.leaderboard_rounded, color: AppColors.cranberry, size: 28),
+              const Icon(Icons.leaderboard_rounded, color: Colors.white, size: 24),
               const SizedBox(width: 12),
               Text(
-                "Hall of Fame",
+                "HALL OF FAME",
                 style: GoogleFonts.orbitron(
-                  fontSize: 24,
+                  fontSize: 20,
                   fontWeight: FontWeight.w900,
-                  color: AppColors.cranberry,
+                  color: Colors.white,
                   letterSpacing: 1,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: 2),
           Text(
             "Recognizing the Hub's most dedicated architects.",
-            style: GoogleFonts.exo2(color: AppColors.taupe, fontWeight: FontWeight.w500),
+            style: GoogleFonts.exo2(color: Colors.white70, fontWeight: FontWeight.w500, fontSize: 11),
           ),
         ],
       ),
@@ -76,8 +83,8 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> with SingleTicker
 
   Widget _buildTabs() {
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
-      height: 45,
+      margin: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+      height: 40,
       decoration: BoxDecoration(
         color: AppColors.plum.withOpacity(0.05),
         borderRadius: BorderRadius.circular(15),
@@ -86,7 +93,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> with SingleTicker
         controller: _tabController,
         indicator: BoxDecoration(
           borderRadius: BorderRadius.circular(12),
-          color: AppColors.cranberry,
+          color: AppColors.plum,
         ),
         labelColor: Colors.white,
         unselectedLabelColor: AppColors.taupe,
@@ -125,7 +132,7 @@ class _LeaderboardList extends StatelessWidget {
         }
 
         return ListView.builder(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 0),
           itemCount: users.length,
           itemBuilder: (context, index) {
             final user = UserModel.fromMap(users[index].data() as Map<String, dynamic>);

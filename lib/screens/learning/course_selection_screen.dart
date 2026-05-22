@@ -22,27 +22,7 @@ class _CourseSelectionScreenState extends State<CourseSelectionScreen> {
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(24, 24, 24, 8),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Select Discipline',
-                  style: GoogleFonts.orbitron(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.cranberry,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  "Choose your technical focus to begin your path.",
-                  style: GoogleFonts.exo2(color: AppColors.taupe),
-                ),
-              ],
-            ),
-          ),
+          _buildHeader(),
           Expanded(
             child: StreamBuilder<List<Course>>(
               stream: _courseService.getAllCoursesStream(),
@@ -51,9 +31,13 @@ class _CourseSelectionScreenState extends State<CourseSelectionScreen> {
                   return const Center(child: CircularProgressIndicator());
                 }
 
-                final courses = snapshot.data ?? [];
-                // Extract unique categories from actual courses in DB
-                final categories = courses.map((c) => c.category).toSet().toList();
+                final allCourses = snapshot.data ?? [];
+                
+                // Filter only published courses for students
+                final publishedCourses = allCourses.where((c) => c.isPublished).toList();
+                
+                // Extract unique categories from published courses
+                final categories = publishedCourses.map((c) => c.category).toSet().toList();
 
                 if (categories.isEmpty) {
                   return _buildEmptyState();
@@ -73,13 +57,45 @@ class _CourseSelectionScreenState extends State<CourseSelectionScreen> {
                     return _CategoryCard(
                       name: catName,
                       icon: _getIconForCategory(catName),
-                      color: _getColorForCategory(catName),
+                      color: AppColors.plum,
                       onTap: () => _showProficiencyDialog(context, catName),
                     );
                   },
                 );
               },
             ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildHeader() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.fromLTRB(24, 12, 24, 12),
+      decoration: const BoxDecoration(
+        color: AppColors.cranberry,
+        borderRadius: BorderRadius.only(
+          bottomLeft: Radius.circular(32),
+          bottomRight: Radius.circular(32),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'SELECT DISCIPLINE',
+            style: GoogleFonts.orbitron(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+            ),
+          ),
+          const SizedBox(height: 2),
+          Text(
+            "Choose your technical focus to begin your path.",
+            style: GoogleFonts.exo2(color: Colors.white70, fontSize: 12),
           ),
         ],
       ),
@@ -100,7 +116,7 @@ class _CourseSelectionScreenState extends State<CourseSelectionScreen> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 8),
             child: Text(
-              "Club Members have not published any course paths yet.",
+              "Our architects haven't published any courses yet. Check back soon!",
               textAlign: TextAlign.center,
               style: GoogleFonts.exo2(color: AppColors.taupe),
             ),
@@ -119,15 +135,6 @@ class _CourseSelectionScreenState extends State<CourseSelectionScreen> {
     }
   }
 
-  Color _getColorForCategory(String name) {
-    switch (name.toLowerCase()) {
-      case 'programming': return Colors.blue;
-      case 'robotics': return Colors.red;
-      case 'drones': return Colors.indigo;
-      default: return AppColors.plum;
-    }
-  }
-
   void _showProficiencyDialog(BuildContext context, String category) {
     showDialog(
       context: context,
@@ -136,35 +143,28 @@ class _CourseSelectionScreenState extends State<CourseSelectionScreen> {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
         title: Text("Select Mastery Level", 
           style: GoogleFonts.orbitron(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.cranberry)),
-        content: Text("Determine your starting point for $category. Beginner covers foundations, Intermediate dives into technical applications.",
+        content: Text("Determine your starting point for $category. Choose the path that matches your current expertise.",
           style: GoogleFonts.exo2(color: AppColors.taupe, height: 1.5)),
-        actionsPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+        actionsPadding: const EdgeInsets.all(20),
         actions: [
-          Row(
+          Column(
             children: [
-              Expanded(
-                child: OutlinedButton(
-                  style: OutlinedButton.styleFrom(
-                    side: const BorderSide(color: AppColors.plum, width: 1.5),
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                  ),
-                  onPressed: () => _navigateToCourse(context, category, Difficulty.beginner),
-                  child: Text("BEGINNER", style: GoogleFonts.orbitron(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.plum)),
-                ),
+              _ProficiencyButton(
+                label: "BEGINNER",
+                color: AppColors.plum,
+                onPressed: () => _navigateToCourse(context, category, Difficulty.beginner),
               ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.plum,
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                    elevation: 0,
-                  ),
-                  onPressed: () => _navigateToCourse(context, category, Difficulty.intermediate),
-                  child: Text("INTERMEDIATE", style: GoogleFonts.orbitron(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.white)),
-                ),
+              const SizedBox(height: 12),
+              _ProficiencyButton(
+                label: "INTERMEDIATE",
+                color: AppColors.plum,
+                onPressed: () => _navigateToCourse(context, category, Difficulty.intermediate),
+              ),
+              const SizedBox(height: 12),
+              _ProficiencyButton(
+                label: "ADVANCED",
+                color: AppColors.cranberry,
+                onPressed: () => _navigateToCourse(context, category, Difficulty.advanced),
               ),
             ],
           ),
@@ -182,6 +182,31 @@ class _CourseSelectionScreenState extends State<CourseSelectionScreen> {
           category: category,
           difficulty: difficulty,
         ),
+      ),
+    );
+  }
+}
+
+class _ProficiencyButton extends StatelessWidget {
+  final String label;
+  final Color color;
+  final VoidCallback onPressed;
+
+  const _ProficiencyButton({required this.label, required this.color, required this.onPressed});
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: double.infinity,
+      child: ElevatedButton(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: color,
+          padding: const EdgeInsets.symmetric(vertical: 16),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          elevation: 0,
+        ),
+        onPressed: onPressed,
+        child: Text(label, style: GoogleFonts.orbitron(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.white)),
       ),
     );
   }
@@ -236,7 +261,7 @@ class _CategoryCard extends StatelessWidget {
               style: GoogleFonts.orbitron(
                 fontSize: 11,
                 fontWeight: FontWeight.w800,
-                color: AppColors.cranberry,
+                color: color,
                 letterSpacing: 1,
               ),
             ),

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../theme/app_colors.dart';
 import '../widgets/tech_background_animation.dart';
 import '../widgets/animated_interactive_card.dart';
-import 'home_screen.dart';
+import 'student_home_screen.dart';
 import 'sign_up_screen.dart';
 import '../services/auth_service.dart';
 import 'committee_dashboard.dart';
@@ -78,10 +78,10 @@ class _LoginScreenState extends State<LoginScreen>
       Widget nextScreen;
       if (role == "admin") {
         nextScreen = const AdminHomeScreen();
-      } else if (role == "club_member" || role == "committee") {
+      } else if (role == "committee") {
         nextScreen = const CommitteeDashboard();
       } else {
-        nextScreen = const HomeScreen();
+        nextScreen = const StudentHomeScreen();
       }
 
       Navigator.pushReplacement(
