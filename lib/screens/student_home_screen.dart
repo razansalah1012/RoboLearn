@@ -11,6 +11,7 @@ import 'learning/course_selection_screen.dart';
 import 'workshop_screen.dart';
 import 'profile_screen.dart';
 import 'leaderboard_screen.dart';
+import 'student_attendance_screen.dart';
 
 class StudentHomeScreen extends StatefulWidget {
   const StudentHomeScreen({super.key});
@@ -19,7 +20,8 @@ class StudentHomeScreen extends StatefulWidget {
   State<StudentHomeScreen> createState() => _StudentHomeScreenState();
 }
 
-class _StudentHomeScreenState extends State<StudentHomeScreen> with SingleTickerProviderStateMixin {
+class _StudentHomeScreenState extends State<StudentHomeScreen>
+    with SingleTickerProviderStateMixin {
   int _selectedNavIndex = 0;
 
   void _onNavTap(int index) {
@@ -29,7 +31,10 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> with SingleTicker
   Widget _getCurrentPage() {
     switch (_selectedNavIndex) {
       case 0:
-        return _HomeTab(onStartLearning: () => _onNavTap(1), onViewWorkshops: () => _onNavTap(3));
+        return _HomeTab(
+          onStartLearning: () => _onNavTap(1),
+          onViewWorkshops: () => _onNavTap(3),
+        );
       case 1:
         return const CourseSelectionScreen();
       case 2:
@@ -38,6 +43,8 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> with SingleTicker
         return const WorkshopScreen();
       case 4:
         return const ProfileScreen();
+      case 5:
+        return const StudentAttendanceScreen();
       default:
         return const Center(child: Text("Error: Tab not found"));
     }
@@ -55,9 +62,7 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> with SingleTicker
               key: ValueKey('home_bg_anim'),
               child: TechBackgroundAnimation(),
             ),
-          SafeArea(
-            child: _getCurrentPage(),
-          ),
+          SafeArea(child: _getCurrentPage()),
         ],
       ),
       bottomNavigationBar: CustomBottomNavBar(
@@ -72,7 +77,10 @@ class _HomeTab extends StatelessWidget {
   final VoidCallback onStartLearning;
   final VoidCallback onViewWorkshops;
 
-  const _HomeTab({required this.onStartLearning, required this.onViewWorkshops});
+  const _HomeTab({
+    required this.onStartLearning,
+    required this.onViewWorkshops,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -84,14 +92,17 @@ class _HomeTab extends StatelessWidget {
         children: [
           _buildUserHeader(user?.uid),
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 20.0),
+            padding: const EdgeInsets.symmetric(
+              horizontal: 24.0,
+              vertical: 20.0,
+            ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const SizedBox(height: 12),
                 _buildMainHero(context),
                 const SizedBox(height: 40),
-                _buildPlatformFeatures(),
+                _buildPlatformFeatures(context),
               ],
             ),
           ),
@@ -102,11 +113,14 @@ class _HomeTab extends StatelessWidget {
 
   Widget _buildUserHeader(String? uid) {
     return StreamBuilder<DocumentSnapshot>(
-      stream: FirebaseFirestore.instance.collection('users').doc(uid ?? '').snapshots(),
+      stream: FirebaseFirestore.instance
+          .collection('users')
+          .doc(uid ?? '')
+          .snapshots(),
       builder: (context, snapshot) {
-        final userData = snapshot.hasData && snapshot.data!.exists 
-          ? UserModel.fromMap(snapshot.data!.data() as Map<String, dynamic>)
-          : null;
+        final userData = snapshot.hasData && snapshot.data!.exists
+            ? UserModel.fromMap(snapshot.data!.data() as Map<String, dynamic>)
+            : null;
 
         return Container(
           width: double.infinity,
@@ -145,7 +159,8 @@ class _HomeTab extends StatelessWidget {
                   ),
                 ],
               ),
-              if (userData != null) _UserRankBadge(xp: userData.totalXp, level: userData.level),
+              if (userData != null)
+                _UserRankBadge(xp: userData.totalXp, level: userData.level),
             ],
           ),
         );
@@ -162,7 +177,7 @@ class _HomeTab extends StatelessWidget {
         borderRadius: BorderRadius.circular(40),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.2),
+            color: Colors.black.withValues(alpha: 0.2),
             blurRadius: 20,
             offset: const Offset(0, 10),
           ),
@@ -187,7 +202,7 @@ class _HomeTab extends StatelessWidget {
             "Start your sequential journey from Arduino foundations to Advanced Robotics. By al jazari club",
             textAlign: TextAlign.center,
             style: GoogleFonts.exo2(
-              color: Colors.white.withOpacity(0.85),
+              color: Colors.white.withValues(alpha: 0.85),
               fontSize: 16,
               height: 1.5,
             ),
@@ -201,12 +216,20 @@ class _HomeTab extends StatelessWidget {
                     backgroundColor: Colors.white,
                     foregroundColor: AppColors.plum,
                     padding: const EdgeInsets.symmetric(vertical: 18),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(18),
+                    ),
                     elevation: 0,
                   ),
                   onPressed: onStartLearning,
                   child: FittedBox(
-                    child: Text("LEARN", style: GoogleFonts.orbitron(fontWeight: FontWeight.w900, fontSize: 15)),
+                    child: Text(
+                      "LEARN",
+                      style: GoogleFonts.orbitron(
+                        fontWeight: FontWeight.w900,
+                        fontSize: 15,
+                      ),
+                    ),
                   ),
                 ),
               ),
@@ -216,15 +239,23 @@ class _HomeTab extends StatelessWidget {
                   style: OutlinedButton.styleFrom(
                     foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(vertical: 18),
-                    side: BorderSide(color: Colors.white.withOpacity(0.4), width: 1.5),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+                    side: BorderSide(
+                      color: Colors.white.withValues(alpha: 0.4),
+                      width: 1.5,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(18),
+                    ),
                   ),
                   onPressed: onViewWorkshops,
                   child: FittedBox(
                     child: Text(
                       "EVENTS",
                       textAlign: TextAlign.center,
-                      style: GoogleFonts.orbitron(fontWeight: FontWeight.w900, fontSize: 15)
+                      style: GoogleFonts.orbitron(
+                        fontWeight: FontWeight.w900,
+                        fontSize: 15,
+                      ),
                     ),
                   ),
                 ),
@@ -236,7 +267,7 @@ class _HomeTab extends StatelessWidget {
     );
   }
 
-  Widget _buildPlatformFeatures() {
+  Widget _buildPlatformFeatures(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -257,6 +288,24 @@ class _HomeTab extends StatelessWidget {
             ),
           ],
         ),
+
+        const SizedBox(height: 20),
+
+        GestureDetector(
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => const StudentAttendanceScreen(),
+              ),
+            );
+          },
+          child: const _FeatureTile(
+            icon: Icons.fact_check_outlined,
+            title: "Workshop Attendance",
+            subtitle: "Check in and track your attendance verification",
+          ),
+        ),
       ],
     );
   }
@@ -275,7 +324,11 @@ class _UserRankBadge extends StatelessWidget {
         color: Colors.white,
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
-          BoxShadow(color: Colors.black.withOpacity(0.06), blurRadius: 12, offset: const Offset(0, 4))
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.06),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
         ],
       ),
       child: Row(
@@ -287,8 +340,22 @@ class _UserRankBadge extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text("$xp XP", style: GoogleFonts.orbitron(fontSize: 12, fontWeight: FontWeight.w900, color: AppColors.plum)),
-              Text("LVL $level", style: GoogleFonts.orbitron(fontSize: 9, fontWeight: FontWeight.bold, color: Colors.grey)),
+              Text(
+                "$xp XP",
+                style: GoogleFonts.orbitron(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w900,
+                  color: AppColors.plum,
+                ),
+              ),
+              Text(
+                "LVL $level",
+                style: GoogleFonts.orbitron(
+                  fontSize: 9,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.grey,
+                ),
+              ),
             ],
           ),
         ],
@@ -316,14 +383,21 @@ class _FeatureTile extends StatelessWidget {
         color: Colors.white,
         borderRadius: BorderRadius.circular(28),
         boxShadow: [
-          BoxShadow(color: Colors.black.withOpacity(0.03), blurRadius: 8, offset: const Offset(0, 4))
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.03),
+            blurRadius: 8,
+            offset: const Offset(0, 4),
+          ),
         ],
       ),
       child: Row(
         children: [
           Container(
             padding: const EdgeInsets.all(14),
-            decoration: BoxDecoration(color: AppColors.beige, borderRadius: BorderRadius.circular(20)),
+            decoration: BoxDecoration(
+              color: AppColors.beige,
+              borderRadius: BorderRadius.circular(20),
+            ),
             child: Icon(icon, color: AppColors.plum, size: 30),
           ),
           const SizedBox(width: 20),
@@ -331,9 +405,23 @@ class _FeatureTile extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title, style: GoogleFonts.orbitron(fontSize: 15, fontWeight: FontWeight.w900, color: AppColors.plum)),
+                Text(
+                  title,
+                  style: GoogleFonts.orbitron(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w900,
+                    color: AppColors.plum,
+                  ),
+                ),
                 const SizedBox(height: 4),
-                Text(subtitle, style: GoogleFonts.exo2(fontSize: 13, color: Colors.grey, height: 1.4)),
+                Text(
+                  subtitle,
+                  style: GoogleFonts.exo2(
+                    fontSize: 13,
+                    color: Colors.grey,
+                    height: 1.4,
+                  ),
+                ),
               ],
             ),
           ),
