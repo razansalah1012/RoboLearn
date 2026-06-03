@@ -34,10 +34,10 @@ class _AnimatedInteractiveCardState extends State<AnimatedInteractiveCard>
         onTap: widget.onTap,
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 400),
-          curve: Curves.fastOutSlowIn, // Approx cubic-bezier transition
+          curve: Curves.fastOutSlowIn,
           margin: widget.margin,
-          transform: Matrix4.translationValues(0, _isHovered ? -8.0 : 0, 0)
-            ..scale(_isHovered ? 1.02 : 1.0),
+          transform: Matrix4.translationValues(0, _isHovered ? -4.0 : 0, 0)
+            ..scale(_isHovered ? 1.01 : 1.0),
           decoration: BoxDecoration(
             color: AppColors.pureWhite,
             borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
@@ -50,15 +50,16 @@ class _AnimatedInteractiveCardState extends State<AnimatedInteractiveCard>
                 color: _isHovered 
                     ? AppColors.hoverShadowColor() 
                     : AppColors.cardShadowColor(),
-                blurRadius: _isHovered ? 25 : 15,
-                offset: Offset(0, _isHovered ? 8 : 2),
+                blurRadius: _isHovered ? 20 : 12,
+                offset: Offset(0, _isHovered ? 6 : 2),
               ),
             ],
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // Top Accent: 3px CRANBERRY gradient line
+              // Top Accent
               Container(
                 height: 3,
                 decoration: const BoxDecoration(

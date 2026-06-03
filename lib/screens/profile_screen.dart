@@ -396,6 +396,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
         },
       ),
 
+      // Only for committee
+    if (userData.role == 'committee' || userData.role == 'admin')
+      _SettingsTile(
+        icon: Icons.add_box_outlined,
+        label: "Create Announcement",
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const CreateAnnouncementScreen()),
+          );
+        },
+      ),
+
         _SettingsTile(
         icon: Icons.rate_review,
         label: "Give Workshop Feedback",

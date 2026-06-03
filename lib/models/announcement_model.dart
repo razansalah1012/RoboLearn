@@ -1,12 +1,14 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 class Announcement {
   final String id;
   final String title;
   final String content;
-  final String type; // 'announcement', 'update', 'material'
+  final String type;
   final String authorId;
   final String authorName;
   final DateTime createdAt;
-  final String priority; // 'high', 'normal'
+  final String priority;
 
   Announcement({
     required this.id,
@@ -27,12 +29,22 @@ class Announcement {
       'type': type,
       'authorId': authorId,
       'authorName': authorName,
-      'createdAt': createdAt,
+      'createdAt': Timestamp.fromDate(createdAt), // Convert DateTime to Timestamp
       'priority': priority,
     };
   }
 
   factory Announcement.fromMap(Map<String, dynamic> map, String id) {
+    // Handle both Timestamp and DateTime
+    DateTime createdAt;
+    if (map['createdAt'] is Timestamp) {
+      createdAt = (map['createdAt'] as Timestamp).toDate();
+    } else if (map['createdAt'] is DateTime) {
+      createdAt = map['createdAt'] as DateTime;
+    } else {
+      createdAt = DateTime.now();
+    }
+
     return Announcement(
       id: id,
       title: map['title'] ?? '',
@@ -40,7 +52,7 @@ class Announcement {
       type: map['type'] ?? 'announcement',
       authorId: map['authorId'] ?? '',
       authorName: map['authorName'] ?? '',
-      createdAt: (map['createdAt'] as DateTime?) ?? DateTime.now(),
+      createdAt: createdAt,
       priority: map['priority'] ?? 'normal',
     );
   }

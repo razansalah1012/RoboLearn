@@ -16,6 +16,8 @@ import 'committee/committee_directory_screen.dart';
 import 'committee/sponsorship_management_screen.dart';
 import 'committee/workshop_management_screen.dart';
 import 'committee/attendance_tracker_screen.dart';
+import 'create_announcement_screen.dart'; 
+import 'announcements_screen.dart';        
 import '../widgets/placeholder_screen.dart';
 
 class CommitteeDashboard extends StatefulWidget {
@@ -234,6 +236,11 @@ class _CommitteeDashboardState extends State<CommitteeDashboard>
               ),
             ),
           ),
+
+           Expanded(
+          child: SingleChildScrollView(
+            child: Column(
+              children: [
           ListTile(
             leading: const Icon(Icons.person_outline),
             title: const Text("My Profile"),
@@ -263,6 +270,29 @@ class _CommitteeDashboardState extends State<CommitteeDashboard>
             ),
           ),
           const Divider(),
+
+           ListTile(
+          leading: const Icon(Icons.announcement_outlined, color: AppColors.cranberry),
+          title: const Text("Create Announcement", style: TextStyle(fontWeight: FontWeight.w600)),
+          onTap: () => Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => const CreateAnnouncementScreen(),
+            ),
+          ),
+        ),
+        ListTile(
+          leading: const Icon(Icons.view_list_outlined, color: AppColors.cranberry),
+          title: const Text("View All Announcements"),
+          onTap: () => Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => const AnnouncementsScreen(),
+            ),
+          ),
+        ),
+        const Divider(),
+
           ListTile(
             leading: const Icon(Icons.event_available_outlined),
             title: const Text("Workshop Management"),
@@ -309,6 +339,10 @@ class _CommitteeDashboardState extends State<CommitteeDashboard>
               ),
             ),
           ),
+              ],
+            ),
+          ),
+           ), 
           const Spacer(),
           ListTile(
             leading: const Icon(Icons.logout, color: Colors.red),
@@ -339,12 +373,11 @@ class _OverviewTab extends StatelessWidget {
               );
             }
 
-            final stats =
-                statsSnap.data ?? {'activeStudents': 0, 'totalXpIssued': 0};
+            final stats = statsSnap.data ?? {'activeStudents': 0, 'totalXpIssued': 0};
             final courseCount = courseCountSnap.data ?? 0;
 
             return SingleChildScrollView(
-              padding: const EdgeInsets.all(24),
+              padding: const EdgeInsets.all(16),
               child: Column(
                 children: [
                   _StatCard(
@@ -353,14 +386,14 @@ class _OverviewTab extends StatelessWidget {
                     icon: Icons.people_rounded,
                     color: const Color(0xFF4A7C59),
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 12),
                   _StatCard(
                     title: 'Total Courses',
                     value: courseCount.toString(),
                     icon: Icons.architecture_rounded,
                     color: AppColors.plum,
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 12),
                   _StatCard(
                     title: 'Workshop Management',
                     value: 'MANAGE',
@@ -373,7 +406,20 @@ class _OverviewTab extends StatelessWidget {
                       ),
                     ),
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 12),
+                  _StatCard(
+                    title: 'Announcements',
+                    value: 'POST',
+                    icon: Icons.announcement_rounded,
+                    color: Colors.orange,
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const CreateAnnouncementScreen(),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
                   _StatCard(
                     title: 'Attendance Tracker',
                     value: 'CHECK IN',
@@ -386,11 +432,10 @@ class _OverviewTab extends StatelessWidget {
                       ),
                     ),
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 12),
                   _StatCard(
                     title: 'XP Issued',
-                    value:
-                        '${(stats['totalXpIssued'] / 1000).toStringAsFixed(1)}k',
+                    value: '${(stats['totalXpIssued'] / 1000).toStringAsFixed(1)}k',
                     icon: Icons.bolt_rounded,
                     color: Colors.orange,
                   ),
@@ -559,19 +604,19 @@ class _StatCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AnimatedInteractiveCard(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(16),
       onTap: onTap,
       child: Row(
         children: [
           Container(
-            padding: const EdgeInsets.all(12),
+            padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
               color: color.withAlpha(20),
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(10),
             ),
-            child: Icon(icon, color: color, size: 28),
+            child: Icon(icon, color: color, size: 24),
           ),
-          const SizedBox(width: 20),
+          const SizedBox(width: 16),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -579,20 +624,20 @@ class _StatCard extends StatelessWidget {
                 Text(
                   value,
                   style: GoogleFonts.orbitron(
-                    fontSize: 24,
+                    fontSize: 20,
                     fontWeight: FontWeight.bold,
                     color: AppColors.cranberry,
                   ),
                 ),
                 Text(
                   title,
-                  style: GoogleFonts.exo2(fontSize: 13, color: AppColors.taupe),
+                  style: GoogleFonts.exo2(fontSize: 12, color: AppColors.taupe),
                 ),
               ],
             ),
           ),
           if (onTap != null)
-            const Icon(Icons.chevron_right, color: AppColors.taupe),
+            const Icon(Icons.chevron_right, size: 18,color: AppColors.taupe),
         ],
       ),
     );
