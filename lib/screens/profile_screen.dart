@@ -7,6 +7,8 @@ import '../models/user_model.dart';
 import 'learning/certificate_list_screen.dart';
 import 'login_screen.dart';
 import 'feedback_screen.dart';
+import 'create_announcement_screen.dart';
+import 'announcements_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -126,7 +128,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     _buildAchievementCard(context),
                   ],
                   const SizedBox(height: 20),
-                  _buildActionList(context, _auth),
+                  _buildActionList(context, _auth, userData),
                 ],
               ),
             ),
@@ -340,9 +342,34 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget _buildActionList(BuildContext context, AuthService auth) {
+  Widget _buildActionList(BuildContext context, AuthService auth, UserModel userData) {
     return Column(
       children: [
+
+        // Content Management - Only for Committee/Admin
+      if (userData.role == 'committee' || userData.role == 'admin')
+        _SettingsTile(
+          icon: Icons.add_box_outlined,
+          label: "Create Announcement",
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const CreateAnnouncementScreen()),
+            );
+          },
+        ),
+      
+      // View Announcements - For ALL users
+      _SettingsTile(
+        icon: Icons.announcement_outlined,
+        label: "View Announcements",
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const AnnouncementsScreen()),
+          );
+        },
+      ),
 
         _SettingsTile(
         icon: Icons.rate_review,
