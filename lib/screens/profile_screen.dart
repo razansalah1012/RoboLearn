@@ -5,6 +5,7 @@ import '../services/auth_service.dart';
 import '../theme/app_colors.dart';
 import '../models/user_model.dart';
 import 'learning/certificate_list_screen.dart';
+import 'student/my_workshops_screen.dart';
 import 'login_screen.dart';
 import 'feedback_screen.dart';
 import 'create_announcement_screen.dart';
@@ -43,7 +44,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   void _saveProfile(UserModel currentUserData) async {
-    if (_formKey.currentState!.validate()) {
+    if (_formKey.currentState?.validate() ?? false) {
       UserModel updatedUser = currentUserData.copyWith(
         name: _nameController.text.trim(),
         phoneNumber: _phoneController.text.trim(),
@@ -93,48 +94,75 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
         return Scaffold(
           backgroundColor: Colors.transparent,
-          appBar: AppBar(
-            backgroundColor: Colors.transparent,
-            elevation: 0,
-            title: Text("MY PROFILE", style: GoogleFonts.orbitron(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.cranberry)),
-            actions: [
-              IconButton(
-                icon: Icon(_isEditing ? Icons.close : Icons.edit, color: AppColors.cranberry),
-                onPressed: () => setState(() => _isEditing = !_isEditing),
-              )
-            ],
-          ),
-          body: SingleChildScrollView(
-            padding: const EdgeInsets.all(24.0),
-            child: Form(
-              key: _formKey,
-              child: Column(
-                children: [
-                  _buildProfileHeader(userData),
-                  const SizedBox(height: 30),
-                  if (_isEditing) ...[
-                    _buildEditFields(),
-                    const SizedBox(height: 20),
-                    ElevatedButton(
-                      onPressed: () => _saveProfile(userData),
-                      style: ElevatedButton.styleFrom(backgroundColor: AppColors.cranberry),
-                      child: const Text("SAVE CHANGES"),
+          body: Column(
+            children: [
+              _buildHeader(),
+              Expanded(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.all(24.0),
+                  child: Form(
+                    key: _formKey,
+                    child: Column(
+                      children: [
+                        _buildProfileHeader(userData),
+                        const SizedBox(height: 30),
+                        if (_isEditing) ...[
+                          _buildEditFields(),
+                          const SizedBox(height: 20),
+                          ElevatedButton(
+                            onPressed: () => _saveProfile(userData),
+                            style: ElevatedButton.styleFrom(backgroundColor: AppColors.cranberry),
+                            child: const Text("SAVE CHANGES"),
+                          ),
+                        ] else ...[
+                          _buildStatsRow(userData),
+                          const SizedBox(height: 30),
+                          _buildExperienceCard(userData),
+                          const SizedBox(height: 30),
+                          _buildAchievementCard(context),
+                        ],
+                        const SizedBox(height: 20),
+                        _buildActionList(context, _auth, userData),
+                      ],
                     ),
-                  ] else ...[
-                    _buildStatsRow(userData),
-                    const SizedBox(height: 30),
-                    _buildExperienceCard(userData),
-                    const SizedBox(height: 30),
-                    _buildAchievementCard(context),
-                  ],
-                  const SizedBox(height: 20),
-                  _buildActionList(context, _auth, userData),
-                ],
+                  ),
+                ),
               ),
-            ),
+            ],
           ),
         );
       },
+    );
+  }
+
+  Widget _buildHeader() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.fromLTRB(24, 12, 24, 12),
+      decoration: const BoxDecoration(
+        color: AppColors.cranberry,
+        borderRadius: BorderRadius.only(
+          bottomLeft: Radius.circular(24),
+          bottomRight: Radius.circular(24),
+        ),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            "MY PROFILE",
+            style: GoogleFonts.orbitron(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+            ),
+          ),
+          IconButton(
+            icon: Icon(_isEditing ? Icons.close : Icons.edit, color: Colors.white, size: 22),
+            onPressed: () => setState(() => _isEditing = !_isEditing),
+          ),
+        ],
+      ),
     );
   }
 
@@ -216,7 +244,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
         children: [
           _StatItem(label: "Courses", value: "${user.completedCoursesCount}", icon: Icons.auto_stories_rounded),
           VerticalDivider(color: AppColors.taupe.withOpacity(0.2), thickness: 1),
-          // Rank is now calculated based on Level for the reset phase
           _StatItem(label: "Rank", value: "#${user.level}", icon: Icons.leaderboard_rounded),
           VerticalDivider(color: AppColors.taupe.withOpacity(0.2), thickness: 1),
           _StatItem(label: "Total XP", value: "${user.totalXp}", icon: Icons.bolt_rounded),
@@ -324,8 +351,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ],
           ),
           const SizedBox(height: 16),
-          // Clean Start: No hardcoded badges. 
-          // This will be populated as the user completes course paths.
           Center(
             child: Text(
               "Complete course paths to earn technical badges.",
@@ -381,6 +406,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
           );
         },
       ),
+        _SettingsTile(
+          icon: Icons.event_available_rounded,
+          label: "My Workshop Registrations",
+          onTap: () => Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const MyWorkshopsScreen()),
+          ),
+        ),
         _SettingsTile(
           icon: Icons.workspace_premium_rounded,
           label: "My Credentials",

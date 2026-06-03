@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../theme/app_colors.dart';
 import '../widgets/tech_background_animation.dart';
 import '../widgets/animated_interactive_card.dart';
-import 'home_screen.dart';
+import 'student_home_screen.dart';
 import 'committee_dashboard.dart';
 import 'admin_home_screen.dart';
 import '../services/auth_service.dart';
@@ -93,7 +93,7 @@ class _SignUpScreenState extends State<SignUpScreen>
           if (_selectedRole == 'admin') {
             nextScreen = const AdminHomeScreen();
           } else {
-            nextScreen = const HomeScreen();
+            nextScreen = const StudentHomeScreen();
           }
           
           Navigator.pushAndRemoveUntil(

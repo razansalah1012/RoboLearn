@@ -14,6 +14,8 @@ import 'admin/course_editor_screen.dart';
 import 'committee/committee_profile_screen.dart';
 import 'committee/committee_directory_screen.dart';
 import 'committee/sponsorship_management_screen.dart';
+import 'committee/workshop_management_screen.dart';
+import 'committee/attendance_tracker_screen.dart';
 import '../widgets/placeholder_screen.dart';
 
 class CommitteeDashboard extends StatefulWidget {
@@ -50,10 +52,7 @@ class _CommitteeDashboardState extends State<CommitteeDashboard>
       body: Stack(
         children: [
           const Positioned.fill(
-            child: Opacity(
-              opacity: 0.4,
-              child: TechBackgroundAnimation(),
-            ),
+            child: Opacity(opacity: 0.4, child: TechBackgroundAnimation()),
           ),
           SafeArea(
             child: Column(
@@ -84,11 +83,16 @@ class _CommitteeDashboardState extends State<CommitteeDashboard>
             icon: const Icon(Icons.add_rounded),
             label: Text(
               'Architect Course',
-              style: GoogleFonts.orbitron(fontWeight: FontWeight.bold, fontSize: 12),
+              style: GoogleFonts.orbitron(
+                fontWeight: FontWeight.bold,
+                fontSize: 12,
+              ),
             ),
             onPressed: () => Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => const CourseEditorScreen()),
+              MaterialPageRoute(
+                builder: (context) => const CourseEditorScreen(),
+              ),
             ),
           );
         },
@@ -98,15 +102,26 @@ class _CommitteeDashboardState extends State<CommitteeDashboard>
 
   Widget _buildDynamicHeader() {
     return StreamBuilder<DocumentSnapshot>(
-      stream: FirebaseFirestore.instance.collection('users').doc(_auth.currentUser?.uid).snapshots(),
+      stream: FirebaseFirestore.instance
+          .collection('users')
+          .doc(_auth.currentUser?.uid)
+          .snapshots(),
       builder: (context, snapshot) {
         if (!snapshot.hasData) return const SizedBox(height: 100);
-        final userData = UserModel.fromMap(snapshot.data!.data() as Map<String, dynamic>);
-        
+        final userData = UserModel.fromMap(
+          snapshot.data!.data() as Map<String, dynamic>,
+        );
+
         return Container(
           decoration: const BoxDecoration(
             gradient: AppColors.primaryGradient,
-            boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 10, offset: Offset(0, 4))],
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black12,
+                blurRadius: 10,
+                offset: Offset(0, 4),
+              ),
+            ],
           ),
           child: Column(
             children: [
@@ -122,11 +137,20 @@ class _CommitteeDashboardState extends State<CommitteeDashboard>
                     ),
                     const SizedBox(width: 8),
                     GestureDetector(
-                      onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const CommitteeProfileScreen())),
+                      onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const CommitteeProfileScreen(),
+                        ),
+                      ),
                       child: CircleAvatar(
                         radius: 20,
-                        backgroundImage: userData.profilePhotoUrl != null ? NetworkImage(userData.profilePhotoUrl!) : null,
-                        child: userData.profilePhotoUrl == null ? const Icon(Icons.person, size: 20) : null,
+                        backgroundImage: userData.profilePhotoUrl != null
+                            ? NetworkImage(userData.profilePhotoUrl!)
+                            : null,
+                        child: userData.profilePhotoUrl == null
+                            ? const Icon(Icons.person, size: 20)
+                            : null,
                       ),
                     ),
                     const SizedBox(width: 12),
@@ -155,11 +179,20 @@ class _CommitteeDashboardState extends State<CommitteeDashboard>
                       ),
                     ),
                     IconButton(
-                      icon: const Icon(Icons.logout_rounded, color: AppColors.ivory, size: 20),
+                      icon: const Icon(
+                        Icons.logout_rounded,
+                        color: AppColors.ivory,
+                        size: 20,
+                      ),
                       onPressed: () async {
                         await _auth.logout();
                         if (mounted) {
-                          Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const LoginScreen()));
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const LoginScreen(),
+                            ),
+                          );
                         }
                       },
                     ),
@@ -171,8 +204,14 @@ class _CommitteeDashboardState extends State<CommitteeDashboard>
                 indicatorColor: AppColors.ivory,
                 labelColor: AppColors.ivory,
                 unselectedLabelColor: AppColors.ivory.withAlpha(140),
-                labelStyle: GoogleFonts.orbitron(fontSize: 11, fontWeight: FontWeight.bold),
-                tabs: const [Tab(text: 'ANALYTICS'), Tab(text: 'CURRICULUM')],
+                labelStyle: GoogleFonts.orbitron(
+                  fontSize: 11,
+                  fontWeight: FontWeight.bold,
+                ),
+                tabs: const [
+                  Tab(text: 'ANALYTICS'),
+                  Tab(text: 'CURRICULUM'),
+                ],
               ),
             ],
           ),
@@ -188,39 +227,87 @@ class _CommitteeDashboardState extends State<CommitteeDashboard>
           const DrawerHeader(
             decoration: BoxDecoration(gradient: AppColors.primaryGradient),
             child: Center(
-              child: Icon(Icons.precision_manufacturing, size: 60, color: Colors.white),
+              child: Icon(
+                Icons.precision_manufacturing,
+                size: 60,
+                color: Colors.white,
+              ),
             ),
           ),
           ListTile(
             leading: const Icon(Icons.person_outline),
             title: const Text("My Profile"),
-            onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const CommitteeProfileScreen())),
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const CommitteeProfileScreen()),
+            ),
           ),
           ListTile(
             leading: const Icon(Icons.contacts_outlined),
             title: const Text("Committee Directory"),
-            onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const CommitteeDirectoryScreen())),
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => const CommitteeDirectoryScreen(),
+              ),
+            ),
           ),
           ListTile(
             leading: const Icon(Icons.monetization_on_outlined),
             title: const Text("Sponsorships"),
-            onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const SponsorshipManagementScreen())),
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => const SponsorshipManagementScreen(),
+              ),
+            ),
           ),
           const Divider(),
           ListTile(
-            leading: const Icon(Icons.event_outlined),
-            title: const Text("Events"),
-            onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const PlaceholderScreen(title: "Events", icon: Icons.event))),
+            leading: const Icon(Icons.event_available_outlined),
+            title: const Text("Workshop Management"),
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => const WorkshopManagementScreen(),
+              ),
+            ),
+          ),
+          ListTile(
+            leading: const Icon(Icons.fact_check_outlined),
+            title: const Text("Attendance Tracker"),
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => const AttendanceTrackerScreen(),
+              ),
+            ),
           ),
           ListTile(
             leading: const Icon(Icons.build_outlined),
             title: const Text("Equipment"),
-            onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const PlaceholderScreen(title: "Equipment", icon: Icons.build))),
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => const PlaceholderScreen(
+                  title: "Equipment",
+                  icon: Icons.build,
+                ),
+              ),
+            ),
           ),
           ListTile(
             leading: const Icon(Icons.notifications_none_outlined),
             title: const Text("Notifications"),
-            onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const PlaceholderScreen(title: "Notifications", icon: Icons.notifications))),
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => const PlaceholderScreen(
+                  title: "Notifications",
+                  icon: Icons.notifications,
+                ),
+              ),
+            ),
           ),
           const Spacer(),
           ListTile(
@@ -247,10 +334,13 @@ class _OverviewTab extends StatelessWidget {
           stream: dashboardService.getTotalCoursesCount(),
           builder: (context, courseCountSnap) {
             if (statsSnap.connectionState == ConnectionState.waiting) {
-              return const Center(child: CircularProgressIndicator(color: AppColors.cranberry));
+              return const Center(
+                child: CircularProgressIndicator(color: AppColors.cranberry),
+              );
             }
 
-            final stats = statsSnap.data ?? {'activeStudents': 0, 'totalXpIssued': 0};
+            final stats =
+                statsSnap.data ?? {'activeStudents': 0, 'totalXpIssued': 0};
             final courseCount = courseCountSnap.data ?? 0;
 
             return SingleChildScrollView(
@@ -272,8 +362,35 @@ class _OverviewTab extends StatelessWidget {
                   ),
                   const SizedBox(height: 16),
                   _StatCard(
+                    title: 'Workshop Management',
+                    value: 'MANAGE',
+                    icon: Icons.handyman_rounded,
+                    color: AppColors.cranberry,
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const WorkshopManagementScreen(),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  _StatCard(
+                    title: 'Attendance Tracker',
+                    value: 'CHECK IN',
+                    icon: Icons.fact_check_outlined,
+                    color: const Color(0xFF4A7C59),
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const AttendanceTrackerScreen(),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  _StatCard(
                     title: 'XP Issued',
-                    value: '${(stats['totalXpIssued'] / 1000).toStringAsFixed(1)}k',
+                    value:
+                        '${(stats['totalXpIssued'] / 1000).toStringAsFixed(1)}k',
                     icon: Icons.bolt_rounded,
                     color: Colors.orange,
                   ),
@@ -297,13 +414,17 @@ class _CoursesTab extends StatelessWidget {
       stream: courseService.getAllCoursesStream(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator(color: AppColors.cranberry));
+          return const Center(
+            child: CircularProgressIndicator(color: AppColors.cranberry),
+          );
         }
         final courses = snapshot.data ?? [];
         if (courses.isEmpty) {
           return Center(
-            child: Text("No courses architected yet.", 
-              style: GoogleFonts.exo2(color: AppColors.taupe)),
+            child: Text(
+              "No courses architected yet.",
+              style: GoogleFonts.exo2(color: AppColors.taupe),
+            ),
           );
         }
         return ListView.builder(
@@ -326,7 +447,9 @@ class _AdminCourseCard extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 16),
       onTap: () => Navigator.push(
         context,
-        MaterialPageRoute(builder: (context) => CourseEditorScreen(course: course)),
+        MaterialPageRoute(
+          builder: (context) => CourseEditorScreen(course: course),
+        ),
       ),
       child: Padding(
         padding: const EdgeInsets.all(20),
@@ -336,32 +459,47 @@ class _AdminCourseCard extends StatelessWidget {
             Row(
               children: [
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
-                    color: AppColors.plum.withOpacity(0.1),
+                    color: AppColors.plum.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Text(
-                    course.category.toUpperCase(), 
-                    style: GoogleFonts.exo2(fontSize: 10, fontWeight: FontWeight.bold, color: AppColors.plum),
+                    course.category.toUpperCase(),
+                    style: GoogleFonts.exo2(
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.plum,
+                    ),
                   ),
                 ),
                 const Spacer(),
                 Text(
                   course.difficulty.name.toUpperCase(),
-                  style: GoogleFonts.orbitron(fontSize: 10, fontWeight: FontWeight.bold, color: AppColors.taupe),
+                  style: GoogleFonts.orbitron(
+                    fontSize: 10,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.taupe,
+                  ),
                 ),
               ],
             ),
             const SizedBox(height: 12),
             Text(
-              course.title, 
-              style: GoogleFonts.orbitron(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.cranberry),
+              course.title,
+              style: GoogleFonts.orbitron(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: AppColors.cranberry,
+              ),
             ),
             const SizedBox(height: 4),
             Text(
-              course.description, 
-              maxLines: 2, 
+              course.description,
+              maxLines: 2,
               overflow: TextOverflow.ellipsis,
               style: GoogleFonts.exo2(fontSize: 12, color: AppColors.taupe),
             ),
@@ -371,17 +509,26 @@ class _AdminCourseCard extends StatelessWidget {
               children: [
                 Row(
                   children: [
-                    const Icon(Icons.edit_note, size: 16, color: AppColors.plum),
+                    const Icon(
+                      Icons.edit_note,
+                      size: 16,
+                      color: AppColors.plum,
+                    ),
                     const SizedBox(width: 8),
                     Text(
-                      "Tap to edit architecture", 
-                      style: GoogleFonts.exo2(fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.plum),
+                      "Tap to edit architecture",
+                      style: GoogleFonts.exo2(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.plum,
+                      ),
                     ),
                   ],
                 ),
                 Switch(
                   value: course.isPublished,
-                  activeColor: Colors.green,
+                  activeThumbColor: Colors.green,
+                  activeTrackColor: Colors.green.withValues(alpha: 0.3),
                   onChanged: (val) {
                     CourseService().togglePublishCourse(course.id, val);
                   },
@@ -399,27 +546,53 @@ class _StatCard extends StatelessWidget {
   final String title, value;
   final IconData icon;
   final Color color;
-  const _StatCard({required this.title, required this.value, required this.icon, required this.color});
+  final VoidCallback? onTap;
+
+  const _StatCard({
+    required this.title,
+    required this.value,
+    required this.icon,
+    required this.color,
+    this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
     return AnimatedInteractiveCard(
       padding: const EdgeInsets.all(20),
+      onTap: onTap,
       child: Row(
         children: [
           Container(
             padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(color: color.withAlpha(20), borderRadius: BorderRadius.circular(12)),
+            decoration: BoxDecoration(
+              color: color.withAlpha(20),
+              borderRadius: BorderRadius.circular(12),
+            ),
             child: Icon(icon, color: color, size: 28),
           ),
           const SizedBox(width: 20),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(value, style: GoogleFonts.orbitron(fontSize: 24, fontWeight: FontWeight.bold, color: AppColors.cranberry)),
-              Text(title, style: GoogleFonts.exo2(fontSize: 13, color: AppColors.taupe)),
-            ],
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  value,
+                  style: GoogleFonts.orbitron(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.cranberry,
+                  ),
+                ),
+                Text(
+                  title,
+                  style: GoogleFonts.exo2(fontSize: 13, color: AppColors.taupe),
+                ),
+              ],
+            ),
           ),
+          if (onTap != null)
+            const Icon(Icons.chevron_right, color: AppColors.taupe),
         ],
       ),
     );

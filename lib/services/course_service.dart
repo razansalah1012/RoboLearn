@@ -40,25 +40,15 @@ class CourseService {
     QuerySnapshot snapshot = await _db
         .collection('courses')
         .where('category', isEqualTo: category)
+        .where('isPublished', isEqualTo: true)
         .get();
 
-    // Backend may contain documents without an explicit isPublished field
-    // (older saved courses). Treat missing isPublished as published for
-    // backward-compatibility when returning curriculum paths to students.
-    final docs = snapshot.docs.where((doc) {
-      final map = doc.data() as Map<String, dynamic>;
-      final bool published = map.containsKey('isPublished') ? (map['isPublished'] as bool? ?? false) : true;
-      return published;
-    }).toList();
-
-    return docs
+    return snapshot.docs
         .map((doc) => Course.fromMap(doc.id, doc.data() as Map<String, dynamic>))
         .toList();
   }
 
   Stream<List<Course>> getAllCoursesStream() {
-    // Use updatedAt for ordering because older course documents may not
-    // include createdAt but do include updatedAt (see data snapshot).
     return _db.collection('courses')
         .orderBy('updatedAt', descending: true)
         .snapshots()
@@ -67,8 +57,6 @@ class CourseService {
   }
 
   Future<List<LearningModule>> getModules(String courseId) async {
-    // FIX: Removed .orderBy('order') to avoid Firestore failed-precondition index error.
-    // Fetch results and sort in-memory in Dart.
     QuerySnapshot snapshot = await _db
         .collection('modules')
         .where('courseId', isEqualTo: courseId)
@@ -78,14 +66,11 @@ class CourseService {
         .map((doc) => LearningModule.fromMap(doc.id, doc.data() as Map<String, dynamic>))
         .toList();
 
-    // Sort by order field
     modules.sort((a, b) => a.order.compareTo(b.order));
-    
     return modules;
   }
 
   Stream<List<LearningModule>> getModulesStream(String courseId) {
-    // Provides real-time updates while avoiding index requirements by sorting in Dart.
     return _db.collection('modules')
         .where('courseId', isEqualTo: courseId)
         .snapshots()
@@ -134,12 +119,8 @@ class CourseService {
 
   bool isModuleUnlocked(LearningModule module, List<LearningModule> allModules, UserProgress? progress) {
     if (module.order == 0) return true;
-    
-    // Check if the previous module in order is completed
     try {
-      final previousModule = allModules.firstWhere(
-        (m) => m.order == module.order - 1,
-      );
+      final previousModule = allModules.firstWhere((m) => m.order == module.order - 1);
       return progress?.completedModuleIds.contains(previousModule.id) ?? false;
     } catch (e) {
       return false;
@@ -209,35 +190,32 @@ class CourseService {
     });
   }
 
+  // --- Active Courses & Dashboard ---
+
+  Stream<List<Map<String, dynamic>>> getActiveUserCourses(String userId) {
+    return _db.collection('user_progress')
+        .where('userId', isEqualTo: userId)
+        .where('isCourseCompleted', isEqualTo: false)
+        .snapshots()
+        .asyncMap((snapshot) async {
+          List<Map<String, dynamic>> activePaths = [];
+          for (var doc in snapshot.docs) {
+            final progress = UserProgress.fromMap(doc.data());
+            final courseDoc = await _db.collection('courses').doc(progress.courseId).get();
+            if (courseDoc.exists) {
+              final course = Course.fromMap(courseDoc.id, courseDoc.data()!);
+              activePaths.add({
+                'course': course,
+                'progress': progress,
+              });
+            }
+          }
+          return activePaths;
+        });
+  }
+
   Future<int> getModulesCount(String courseId) async {
     final snap = await _db.collection('modules').where('courseId', isEqualTo: courseId).get();
     return snap.docs.length;
-  }
-
-  // --- Enrollments & Analytics ---
-  
-  Stream<int> getEnrollmentCount(String courseId) {
-    return _db.collection('enrollments')
-        .where('courseId', isEqualTo: courseId)
-        .snapshots()
-        .map((snap) => snap.docs.length);
-  }
-
-  // Award XP Logic
-  Future<void> awardXpToStudent(String studentId, int amount, String reason) async {
-    final userRef = _db.collection('users').doc(studentId);
-    await _db.runTransaction((transaction) async {
-      final snapshot = await transaction.get(userRef);
-      if (snapshot.exists) {
-        int currentXp = (snapshot.data()?['totalXp'] as num? ?? 0).toInt();
-        transaction.update(userRef, {'totalXp': currentXp + amount});
-        
-        transaction.set(_db.collection('activity_logs').doc(), {
-          'action': 'XP Awarded',
-          'details': 'Awarded $amount XP to student for $reason',
-          'timestamp': FieldValue.serverTimestamp(),
-        });
-      }
-    });
   }
 }

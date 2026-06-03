@@ -84,74 +84,97 @@ class _CoursePathScreenState extends State<CoursePathScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.beige,
-      body: CustomScrollView(
-        slivers: [
-          _buildAppBar(),
-          if (_isLoading)
-            const SliverFillRemaining(child: Center(child: CircularProgressIndicator(color: AppColors.cranberry)))
-          else if (_modules == null || _modules!.isEmpty)
-            _buildEmptyState()
-          else
-            _buildPathNodes(),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildAppBar() {
-    return SliverAppBar(
-      expandedHeight: 120.0,
-      floating: false,
-      pinned: true,
-      backgroundColor: AppColors.cranberry,
-      flexibleSpace: FlexibleSpaceBar(
-        title: Text('${widget.category.toUpperCase()} PATH', 
-          style: GoogleFonts.orbitron(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.white, letterSpacing: 1.2)),
-        background: Container(decoration: const BoxDecoration(gradient: AppColors.primaryGradient)),
-      ),
-    );
-  }
-
-  Widget _buildEmptyState() {
-    return SliverFillRemaining(
-      child: Center(
+      body: SafeArea(
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.architecture_rounded, size: 64, color: AppColors.taupe),
-            const SizedBox(height: 16),
-            Text("Architecture Pending", style: GoogleFonts.orbitron(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.cranberry)),
-            Text("Our architects are currently designing this path.", style: GoogleFonts.exo2(color: AppColors.taupe)),
+            _buildCompactHeader(),
+            Expanded(
+              child: _isLoading
+                  ? const Center(child: CircularProgressIndicator(color: AppColors.cranberry))
+                  : (_modules == null || _modules!.isEmpty)
+                      ? _buildEmptyState()
+                      : SingleChildScrollView(
+                          padding: const EdgeInsets.symmetric(vertical: 40),
+                          child: Column(
+                            children: List.generate(_modules!.length, (index) {
+                              final module = _modules![index];
+                              final isUnlocked = _courseService.isModuleUnlocked(module, _modules!, _progress);
+                              final isCompleted = _progress?.completedModuleIds.contains(module.id) ?? false;
+                              final isLast = index == _modules!.length - 1;
+                              double indent = (index % 2 == 0) ? 40.0 : -40.0;
+
+                              return _PathNode(
+                                module: module,
+                                isUnlocked: isUnlocked,
+                                isCompleted: isCompleted,
+                                isLast: isLast,
+                                indent: indent,
+                                onTap: () => _onModuleTap(module, isUnlocked),
+                              );
+                            }),
+                          ),
+                        ),
+            ),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildPathNodes() {
-    return SliverPadding(
-      padding: const EdgeInsets.symmetric(vertical: 40),
-      sliver: SliverList(
-        delegate: SliverChildBuilderDelegate(
-          (context, index) {
-            final module = _modules![index];
-            final isUnlocked = _courseService.isModuleUnlocked(module, _modules!, _progress);
-            final isCompleted = _progress?.completedModuleIds.contains(module.id) ?? false;
-            final isLast = index == _modules!.length - 1;
-
-            double indent = (index % 2 == 0) ? 40.0 : -40.0;
-
-            return _PathNode(
-              module: module,
-              isUnlocked: isUnlocked,
-              isCompleted: isCompleted,
-              isLast: isLast,
-              indent: indent,
-              onTap: () => _onModuleTap(module, isUnlocked),
-            );
-          },
-          childCount: _modules!.length,
+  Widget _buildCompactHeader() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.fromLTRB(16, 12, 24, 12),
+      decoration: const BoxDecoration(
+        color: AppColors.cranberry,
+        borderRadius: BorderRadius.only(
+          bottomLeft: Radius.circular(32),
+          bottomRight: Radius.circular(32),
         ),
+      ),
+      child: Row(
+        children: [
+          IconButton(
+            icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white, size: 20),
+            onPressed: () => Navigator.pop(context),
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  '${widget.category.toUpperCase()} PATH',
+                  style: GoogleFonts.orbitron(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                    letterSpacing: 1.2,
+                  ),
+                ),
+                Text(
+                  widget.difficulty.name.toUpperCase(),
+                  style: GoogleFonts.exo2(color: Colors.white70, fontSize: 10, fontWeight: FontWeight.bold),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildEmptyState() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Icon(Icons.architecture_rounded, size: 64, color: AppColors.taupe),
+          const SizedBox(height: 16),
+          Text("Architecture Pending", style: GoogleFonts.orbitron(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.cranberry)),
+          Text("Our architects are currently designing this path.", style: GoogleFonts.exo2(color: AppColors.taupe)),
+        ],
       ),
     );
   }
