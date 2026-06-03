@@ -11,11 +11,8 @@ import 'learning/course_selection_screen.dart';
 import 'workshop_screen.dart';
 import 'profile_screen.dart';
 import 'leaderboard_screen.dart';
-<<<<<<< HEAD
 import 'feedback_screen.dart';
-=======
 import 'student_attendance_screen.dart';
->>>>>>> 2585ec1ddd043dd934a213a910554055b9018b41
 
 class StudentHomeScreen extends StatefulWidget {
   const StudentHomeScreen({super.key});
@@ -49,8 +46,6 @@ class _StudentHomeScreenState extends State<StudentHomeScreen>
         return const FeedbackScreen();
       case 5:
         return const ProfileScreen();
-      case 5:
-        return const StudentAttendanceScreen();
       default:
         return const Center(child: Text("Error: Tab not found"));
     }
