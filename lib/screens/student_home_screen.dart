@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:robolearn/screens/announcements_screen.dart';
 
 import '../theme/app_colors.dart';
 import '../widgets/custom_bottom_nav.dart';
@@ -16,6 +17,7 @@ import 'student/notification_feed_screen.dart';
 import 'workshop_screen.dart';
 import 'profile_screen.dart';
 import 'leaderboard_screen.dart';
+import 'feedback_screen.dart';
 import 'student_attendance_screen.dart';
 
 class StudentHomeScreen extends StatefulWidget {
@@ -45,11 +47,13 @@ class _StudentHomeScreenState extends State<StudentHomeScreen>
       case 2:
         return const LeaderboardScreen();
       case 3:
-        return const WorkshopScreen();
+        return const AnnouncementsScreen();
       case 4:
-        return const ProfileScreen();
+        return const WorkshopScreen();
       case 5:
-        return const StudentAttendanceScreen();
+        return const FeedbackScreen();
+      case 6:
+        return const ProfileScreen();
       default:
         return const Center(child: Text("Error: Tab not found"));
     }

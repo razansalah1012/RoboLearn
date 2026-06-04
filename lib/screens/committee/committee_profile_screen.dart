@@ -130,7 +130,8 @@ class _CommitteeProfileScreenState extends State<CommitteeProfileScreen> {
   }
 
   Widget _buildStatsGrid(UserModel user) {
-    return GridView.count(
+    return SingleChildScrollView(
+      child: GridView.count(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       crossAxisCount: 2,
@@ -143,6 +144,7 @@ class _CommitteeProfileScreenState extends State<CommitteeProfileScreen> {
         _StatItem(label: "Events", value: "${user.eventsParticipated}", icon: Icons.event, color: Colors.blue),
         _StatItem(label: "Status", value: "Active", icon: Icons.check_circle, color: Colors.green),
       ],
+      ),
     );
   }
 

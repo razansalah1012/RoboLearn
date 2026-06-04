@@ -9,6 +9,7 @@ import 'learning/course_selection_screen.dart';
 import 'workshop_screen.dart';
 import 'profile_screen.dart';
 import 'leaderboard_screen.dart';
+import 'feedback_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -61,6 +62,8 @@ class _HomeScreenState extends State<HomeScreen>
       case 3:
         return const WorkshopScreen();
       case 4:
+        return const FeedbackScreen();
+      case 5:
         return const ProfileScreen();
       default:
         return Stack(
