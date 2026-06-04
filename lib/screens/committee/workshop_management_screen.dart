@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../models/workshop_model.dart';
 import '../../services/workshop_service.dart';
 import '../../theme/app_colors.dart';
+import 'notification_announcement_screen.dart';
 import 'workshop_form_screen.dart';
 import 'workshop_participant_list_screen.dart';
 
@@ -19,6 +20,18 @@ class WorkshopManagementScreen extends StatelessWidget {
         title: Text("WORKSHOP ARCHITECT", style: GoogleFonts.orbitron(fontSize: 16, fontWeight: FontWeight.bold)),
         backgroundColor: AppColors.cranberry,
         foregroundColor: Colors.white,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.campaign_outlined),
+            tooltip: 'Send announcement',
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const NotificationAnnouncementScreen()),
+              );
+            },
+          ),
+        ],
       ),
       body: StreamBuilder<List<Workshop>>(
         stream: workshopService.getAllWorkshopsStream(),
@@ -119,6 +132,19 @@ class _WorkshopManagementCard extends StatelessWidget {
                   label: const Text("Edit"),
                 ),
                 const SizedBox(width: 8),
+                TextButton.icon(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => NotificationAnnouncementScreen(workshop: workshop),
+                      ),
+                    );
+                  },
+                  icon: const Icon(Icons.campaign_outlined, size: 18),
+                  label: const Text("Announce"),
+                ),
+                const SizedBox(width: 8),
                 if (!workshop.isCompleted)
                   TextButton.icon(
                     onPressed: () async {
@@ -141,7 +167,7 @@ class _WorkshopManagementCard extends StatelessWidget {
                     label: const Text("Mark Completed", style: TextStyle(color: Colors.green)),
                   )
                 else
-                   TextButton.icon(
+                  TextButton.icon(
                     onPressed: () async {
                       await workshopService.markAsCompleted(workshop.id, false);
                     },

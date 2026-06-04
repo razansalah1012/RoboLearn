@@ -16,6 +16,7 @@ import 'committee/committee_directory_screen.dart';
 import 'committee/sponsorship_management_screen.dart';
 import 'committee/workshop_management_screen.dart';
 import 'committee/attendance_tracker_screen.dart';
+import 'committee/notification_announcement_screen.dart';
 import '../widgets/placeholder_screen.dart';
 
 class CommitteeDashboard extends StatefulWidget {
@@ -302,10 +303,7 @@ class _CommitteeDashboardState extends State<CommitteeDashboard>
             onTap: () => Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (_) => const PlaceholderScreen(
-                  title: "Notifications",
-                  icon: Icons.notifications,
-                ),
+                builder: (_) => const NotificationAnnouncementScreen(),
               ),
             ),
           ),

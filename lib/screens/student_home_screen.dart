@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -6,8 +8,11 @@ import '../theme/app_colors.dart';
 import '../widgets/custom_bottom_nav.dart';
 import '../widgets/tech_background_animation.dart';
 import '../services/auth_service.dart';
+import '../services/notification_service.dart';
+import '../models/notification_model.dart';
 import '../models/user_model.dart';
 import 'learning/course_selection_screen.dart';
+import 'student/notification_feed_screen.dart';
 import 'workshop_screen.dart';
 import 'profile_screen.dart';
 import 'leaderboard_screen.dart';
@@ -73,7 +78,7 @@ class _StudentHomeScreenState extends State<StudentHomeScreen>
   }
 }
 
-class _HomeTab extends StatelessWidget {
+class _HomeTab extends StatefulWidget {
   final VoidCallback onStartLearning;
   final VoidCallback onViewWorkshops;
 
@@ -81,6 +86,59 @@ class _HomeTab extends StatelessWidget {
     required this.onStartLearning,
     required this.onViewWorkshops,
   });
+
+  @override
+  State<_HomeTab> createState() => _HomeTabState();
+}
+
+class _HomeTabState extends State<_HomeTab> {
+  final NotificationService _notificationService = NotificationService();
+  bool _hasUnreadNotifications = false;
+  String? _lastSeenNotificationId;
+  String? _latestNotificationId;
+  StreamSubscription<List<NotificationItem>>? _notificationSubscription;
+
+  @override
+  void initState() {
+    super.initState();
+    _notificationSubscription = _notificationService
+        .getNotificationsStream()
+        .listen((notifications) {
+      if (notifications.isEmpty) {
+        return;
+      }
+
+      final latestId = notifications.first.id;
+      _latestNotificationId = latestId;
+
+      if (_lastSeenNotificationId == null || _lastSeenNotificationId != latestId) {
+        setState(() {
+          _hasUnreadNotifications = true;
+        });
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _notificationSubscription?.cancel();
+    super.dispose();
+  }
+
+  Future<void> _openNotificationFeed(BuildContext context) async {
+    await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => const NotificationFeedScreen(),
+      ),
+    );
+
+    if (!mounted) return;
+    setState(() {
+      _hasUnreadNotifications = false;
+      _lastSeenNotificationId = _latestNotificationId;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -159,12 +217,57 @@ class _HomeTab extends StatelessWidget {
                   ),
                 ],
               ),
-              if (userData != null)
-                _UserRankBadge(xp: userData.totalXp, level: userData.level),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  _buildNotificationButton(context),
+                  const SizedBox(width: 12),
+                  if (userData != null)
+                    _UserRankBadge(xp: userData.totalXp, level: userData.level),
+                ],
+              ),
             ],
           ),
         );
       },
+    );
+  }
+
+  Widget _buildNotificationButton(BuildContext context) {
+    return GestureDetector(
+      onTap: () => _openNotificationFeed(context),
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          Container(
+            width: 46,
+            height: 46,
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 41),
+              borderRadius: BorderRadius.circular(14),
+            ),
+            child: const Icon(
+              Icons.notifications_none,
+              color: Color.fromARGB(255, 105, 11, 11),
+              size: 24,
+            ),
+          ),
+          if (_hasUnreadNotifications)
+            Positioned(
+              top: -2,
+              right: -2,
+              child: Container(
+                width: 12,
+                height: 12,
+                decoration: BoxDecoration(
+                  color: Colors.redAccent,
+                  shape: BoxShape.circle,
+                  border: Border.all(color: Colors.white, width: 1.8),
+                ),
+              ),
+            ),
+        ],
+      ),
     );
   }
 
@@ -221,7 +324,7 @@ class _HomeTab extends StatelessWidget {
                     ),
                     elevation: 0,
                   ),
-                  onPressed: onStartLearning,
+                  onPressed: widget.onStartLearning,
                   child: FittedBox(
                     child: Text(
                       "LEARN",
@@ -247,7 +350,7 @@ class _HomeTab extends StatelessWidget {
                       borderRadius: BorderRadius.circular(18),
                     ),
                   ),
-                  onPressed: onViewWorkshops,
+                  onPressed: widget.onViewWorkshops,
                   child: FittedBox(
                     child: Text(
                       "EVENTS",
@@ -304,6 +407,21 @@ class _HomeTab extends StatelessWidget {
             icon: Icons.fact_check_outlined,
             title: "Workshop Attendance",
             subtitle: "Check in and track your attendance verification",
+          ),
+        ),
+        const SizedBox(height: 16),
+        GestureDetector(
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const NotificationFeedScreen()),
+            );
+          },
+          child: const _FeatureTile(
+            icon: Icons.notifications_active_outlined,
+            title: "Club Notifications",
+            subtitle:
+                "Receive workshop updates and event announcements instantly",
           ),
         ),
       ],
