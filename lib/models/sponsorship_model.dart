@@ -8,6 +8,7 @@ class Sponsorship {
   final String contactPhone;
   final double amount;
   final String purpose;
+  final String workshopId;
   final String status; // Pending, Approved, Rejected, Received
   final String notes;
   final DateTime appliedDate;
@@ -22,6 +23,7 @@ class Sponsorship {
     required this.contactPhone,
     required this.amount,
     required this.purpose,
+    this.workshopId = '',
     required this.status,
     required this.notes,
     required this.appliedDate,
@@ -37,6 +39,7 @@ class Sponsorship {
       'contactPhone': contactPhone,
       'amount': amount,
       'purpose': purpose,
+      'workshopId': workshopId,
       'status': status,
       'notes': notes,
       'appliedDate': Timestamp.fromDate(appliedDate),
@@ -54,6 +57,7 @@ class Sponsorship {
       contactPhone: map['contactPhone'] ?? '',
       amount: (map['amount'] as num?)?.toDouble() ?? 0.0,
       purpose: map['purpose'] ?? '',
+      workshopId: map['workshopId'] ?? '',
       status: map['status'] ?? 'Pending',
       notes: map['notes'] ?? '',
       appliedDate: (map['appliedDate'] as Timestamp?)?.toDate() ?? DateTime.now(),

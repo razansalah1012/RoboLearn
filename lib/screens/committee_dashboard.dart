@@ -16,6 +16,7 @@ import 'committee/committee_directory_screen.dart';
 import 'committee/sponsorship_management_screen.dart';
 import 'committee/workshop_management_screen.dart';
 import 'committee/attendance_tracker_screen.dart';
+import 'committee/equipment_management_screen.dart';
 import '../widgets/placeholder_screen.dart';
 
 class CommitteeDashboard extends StatefulWidget {
@@ -285,14 +286,11 @@ class _CommitteeDashboardState extends State<CommitteeDashboard>
           ),
           ListTile(
             leading: const Icon(Icons.build_outlined),
-            title: const Text("Equipment"),
+            title: const Text("Equipment Management"),
             onTap: () => Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (_) => const PlaceholderScreen(
-                  title: "Equipment",
-                  icon: Icons.build,
-                ),
+                builder: (_) => const EquipmentManagementScreen(),
               ),
             ),
           ),

@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../models/sponsorship_model.dart';
+import '../../models/workshop_model.dart';
 import '../../services/sponsorship_service.dart';
+import '../../services/workshop_service.dart';
 import '../../services/auth_service.dart';
 import '../../theme/app_colors.dart';
-import '../../theme/app_theme.dart';
 import '../../widgets/animated_interactive_card.dart';
 
 class SponsorshipFormScreen extends StatefulWidget {
@@ -19,6 +20,7 @@ class SponsorshipFormScreen extends StatefulWidget {
 class _SponsorshipFormScreenState extends State<SponsorshipFormScreen> {
   final _formKey = GlobalKey<FormState>();
   final SponsorshipService _sponsorshipService = SponsorshipService();
+  final WorkshopService _workshopService = WorkshopService();
   final AuthService _authService = AuthService();
 
   late TextEditingController _companyNameController;
@@ -26,11 +28,12 @@ class _SponsorshipFormScreenState extends State<SponsorshipFormScreen> {
   late TextEditingController _contactEmailController;
   late TextEditingController _contactPhoneController;
   late TextEditingController _amountController;
-  late TextEditingController _purposeController;
   late TextEditingController _notesController;
 
   String _status = 'Pending';
   bool _isSaving = false;
+  List<Workshop> _workshops = [];
+  Workshop? _selectedWorkshop;
 
   bool get _isEditMode => widget.sponsorship != null;
 
@@ -44,9 +47,24 @@ class _SponsorshipFormScreenState extends State<SponsorshipFormScreen> {
     _amountController = TextEditingController(
       text: widget.sponsorship != null ? widget.sponsorship!.amount.toStringAsFixed(2) : '',
     );
-    _purposeController = TextEditingController(text: widget.sponsorship?.purpose ?? '');
     _notesController = TextEditingController(text: widget.sponsorship?.notes ?? '');
     _status = widget.sponsorship?.status ?? 'Pending';
+    _loadWorkshops();
+  }
+
+  Future<void> _loadWorkshops() async {
+    _workshopService.getAllWorkshopsStream().first.then((workshops) {
+      if (!mounted) return;
+      setState(() {
+        _workshops = workshops;
+        if (_isEditMode && widget.sponsorship!.workshopId.isNotEmpty) {
+          _selectedWorkshop = workshops.firstWhere(
+            (w) => w.id == widget.sponsorship!.workshopId,
+            orElse: () => workshops.first,
+          );
+        }
+      });
+    });
   }
 
   @override
@@ -56,7 +74,6 @@ class _SponsorshipFormScreenState extends State<SponsorshipFormScreen> {
     _contactEmailController.dispose();
     _contactPhoneController.dispose();
     _amountController.dispose();
-    _purposeController.dispose();
     _notesController.dispose();
     super.dispose();
   }
@@ -77,7 +94,8 @@ class _SponsorshipFormScreenState extends State<SponsorshipFormScreen> {
         contactEmail: _contactEmailController.text.trim(),
         contactPhone: _contactPhoneController.text.trim(),
         amount: amount,
-        purpose: _purposeController.text.trim(),
+        purpose: _selectedWorkshop?.title ?? '',
+        workshopId: _selectedWorkshop?.id ?? '',
         status: _status,
         notes: _notesController.text.trim(),
         appliedDate: widget.sponsorship?.appliedDate ?? DateTime.now(),
@@ -137,7 +155,7 @@ class _SponsorshipFormScreenState extends State<SponsorshipFormScreen> {
       try {
         await _sponsorshipService.deleteSponsorship(widget.sponsorship!.id);
         if (mounted) {
-          Navigator.pop(context); // close form screen
+          Navigator.pop(context);
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
               content: Text("Sponsorship record deleted"),
@@ -209,14 +227,24 @@ class _SponsorshipFormScreenState extends State<SponsorshipFormScreen> {
                   validator: (val) => val == null || val.trim().isEmpty ? "Please enter company name" : null,
                 ),
                 const SizedBox(height: 16),
-                TextFormField(
-                  controller: _purposeController,
+                DropdownButtonFormField<Workshop>(
+                  value: _selectedWorkshop,
                   decoration: const InputDecoration(
-                    labelText: "Purpose / Activity Name*",
-                    prefixIcon: Icon(Icons.flag_outlined),
-                    hintText: "e.g., RoboCon 2026, Club Kits",
+                    labelText: "Workshop*",
+                    prefixIcon: Icon(Icons.event_outlined),
+                    hintText: "Select a workshop",
                   ),
-                  validator: (val) => val == null || val.trim().isEmpty ? "Please enter purpose" : null,
+                  items: _workshops
+                      .map((workshop) => DropdownMenuItem<Workshop>(
+                            value: workshop,
+                            child: Text(
+                              workshop.title,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ))
+                      .toList(),
+                  onChanged: (val) => setState(() => _selectedWorkshop = val),
+                  validator: (val) => val == null ? "Please select a workshop" : null,
                 ),
                 const SizedBox(height: 16),
                 TextFormField(
@@ -256,9 +284,7 @@ class _SponsorshipFormScreenState extends State<SponsorshipFormScreen> {
                           ))
                       .toList(),
                   onChanged: (val) {
-                    if (val != null) {
-                      setState(() => _status = val);
-                    }
+                    if (val != null) setState(() => _status = val);
                   },
                 ),
                 const SizedBox(height: 24),

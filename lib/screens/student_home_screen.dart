@@ -12,6 +12,7 @@ import 'workshop_screen.dart';
 import 'profile_screen.dart';
 import 'leaderboard_screen.dart';
 import 'student_attendance_screen.dart';
+import 'student/equipment_booking_screen.dart';
 
 class StudentHomeScreen extends StatefulWidget {
   const StudentHomeScreen({super.key});
@@ -304,6 +305,22 @@ class _HomeTab extends StatelessWidget {
             icon: Icons.fact_check_outlined,
             title: "Workshop Attendance",
             subtitle: "Check in and track your attendance verification",
+          ),
+        ),
+        const SizedBox(height: 16),
+        GestureDetector(
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => const EquipmentBookingScreen(),
+              ),
+            );
+          },
+          child: const _FeatureTile(
+            icon: Icons.build_outlined,
+            title: "Lab Equipment",
+            subtitle: "Browse and book lab equipment for your projects",
           ),
         ),
       ],
