@@ -7,6 +7,7 @@ import '../models/user_model.dart';
 import 'learning/certificate_list_screen.dart';
 import 'student/my_workshops_screen.dart';
 import 'login_screen.dart';
+import 'feedback_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -375,6 +376,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
             MaterialPageRoute(builder: (context) => const MyWorkshopsScreen()),
           ),
         ),
+
+         _SettingsTile(
+        icon: Icons.rate_review,
+        label: "Give Workshop Feedback",
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const FeedbackScreen()),
+          );
+        },
+      ),
+      
         _SettingsTile(
           icon: Icons.workspace_premium_rounded,
           label: "My Credentials",
