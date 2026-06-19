@@ -18,6 +18,7 @@ import 'committee/workshop_management_screen.dart';
 import 'committee/attendance_tracker_screen.dart';
 import 'committee/equipment_management_screen.dart';
 import '../widgets/placeholder_screen.dart';
+import 'committee/analytics_overview.dart';
 
 class CommitteeDashboard extends StatefulWidget {
   const CommitteeDashboard({super.key});
@@ -325,80 +326,7 @@ class _OverviewTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder<Map<String, dynamic>>(
-      stream: dashboardService.getCommitteeStats(),
-      builder: (context, statsSnap) {
-        return StreamBuilder<int>(
-          stream: dashboardService.getTotalCoursesCount(),
-          builder: (context, courseCountSnap) {
-            if (statsSnap.connectionState == ConnectionState.waiting) {
-              return const Center(
-                child: CircularProgressIndicator(color: AppColors.cranberry),
-              );
-            }
-
-            final stats =
-                statsSnap.data ?? {'activeStudents': 0, 'totalXpIssued': 0};
-            final courseCount = courseCountSnap.data ?? 0;
-
-            return SingleChildScrollView(
-              padding: const EdgeInsets.all(24),
-              child: Column(
-                children: [
-                  _StatCard(
-                    title: 'Active Students',
-                    value: stats['activeStudents'].toString(),
-                    icon: Icons.people_rounded,
-                    color: const Color(0xFF4A7C59),
-                  ),
-                  const SizedBox(height: 16),
-                  _StatCard(
-                    title: 'Total Courses',
-                    value: courseCount.toString(),
-                    icon: Icons.architecture_rounded,
-                    color: AppColors.plum,
-                  ),
-                  const SizedBox(height: 16),
-                  _StatCard(
-                    title: 'Workshop Management',
-                    value: 'MANAGE',
-                    icon: Icons.handyman_rounded,
-                    color: AppColors.cranberry,
-                    onTap: () => Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => const WorkshopManagementScreen(),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  _StatCard(
-                    title: 'Attendance Tracker',
-                    value: 'CHECK IN',
-                    icon: Icons.fact_check_outlined,
-                    color: const Color(0xFF4A7C59),
-                    onTap: () => Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => const AttendanceTrackerScreen(),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  _StatCard(
-                    title: 'XP Issued',
-                    value:
-                        '${(stats['totalXpIssued'] / 1000).toStringAsFixed(1)}k',
-                    icon: Icons.bolt_rounded,
-                    color: Colors.orange,
-                  ),
-                ],
-              ),
-            );
-          },
-        );
-      },
-    );
+    return const AnalyticsOverview(); 
   }
 }
 
