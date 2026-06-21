@@ -17,9 +17,10 @@ import 'committee/sponsorship_management_screen.dart';
 import 'committee/workshop_management_screen.dart';
 import 'committee/attendance_tracker_screen.dart';
 import 'committee/equipment_management_screen.dart';
+import 'committee/lab_access_tracking_screen.dart';
 import 'committee/notification_announcement_screen.dart';
-import 'create_announcement_screen.dart'; 
-import 'announcements_screen.dart';        
+import 'create_announcement_screen.dart';
+import 'announcements_screen.dart';
 import '../widgets/placeholder_screen.dart';
 
 class CommitteeDashboard extends StatefulWidget {
@@ -239,106 +240,127 @@ class _CommitteeDashboardState extends State<CommitteeDashboard>
             ),
           ),
 
-           Expanded(
-          child: SingleChildScrollView(
-            child: Column(
-              children: [
-          ListTile(
-            leading: const Icon(Icons.person_outline),
-            title: const Text("My Profile"),
-            onTap: () => Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => const CommitteeProfileScreen()),
-            ),
-          ),
-          ListTile(
-            leading: const Icon(Icons.contacts_outlined),
-            title: const Text("Committee Directory"),
-            onTap: () => Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => const CommitteeDirectoryScreen(),
-              ),
-            ),
-          ),
-          ListTile(
-            leading: const Icon(Icons.monetization_on_outlined),
-            title: const Text("Sponsorships"),
-            onTap: () => Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => const SponsorshipManagementScreen(),
-              ),
-            ),
-          ),
-          const Divider(),
+          Expanded(
+            child: SingleChildScrollView(
+              child: Column(
+                children: [
+                  ListTile(
+                    leading: const Icon(Icons.person_outline),
+                    title: const Text("My Profile"),
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const CommitteeProfileScreen(),
+                      ),
+                    ),
+                  ),
+                  ListTile(
+                    leading: const Icon(Icons.contacts_outlined),
+                    title: const Text("Committee Directory"),
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const CommitteeDirectoryScreen(),
+                      ),
+                    ),
+                  ),
+                  ListTile(
+                    leading: const Icon(Icons.monetization_on_outlined),
+                    title: const Text("Sponsorships"),
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const SponsorshipManagementScreen(),
+                      ),
+                    ),
+                  ),
+                  const Divider(),
 
-           ListTile(
-          leading: const Icon(Icons.announcement_outlined, color: AppColors.cranberry),
-          title: const Text("Create Announcement", style: TextStyle(fontWeight: FontWeight.w600)),
-          onTap: () => Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (_) => const CreateAnnouncementScreen(),
-            ),
-          ),
-        ),
-        ListTile(
-          leading: const Icon(Icons.view_list_outlined, color: AppColors.cranberry),
-          title: const Text("View All Announcements"),
-          onTap: () => Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (_) => const AnnouncementsScreen(),
-            ),
-          ),
-        ),
-        const Divider(),
+                  ListTile(
+                    leading: const Icon(
+                      Icons.announcement_outlined,
+                      color: AppColors.cranberry,
+                    ),
+                    title: const Text(
+                      "Create Announcement",
+                      style: TextStyle(fontWeight: FontWeight.w600),
+                    ),
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const CreateAnnouncementScreen(),
+                      ),
+                    ),
+                  ),
+                  ListTile(
+                    leading: const Icon(
+                      Icons.view_list_outlined,
+                      color: AppColors.cranberry,
+                    ),
+                    title: const Text("View All Announcements"),
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const AnnouncementsScreen(),
+                      ),
+                    ),
+                  ),
+                  const Divider(),
 
-          ListTile(
-            leading: const Icon(Icons.event_available_outlined),
-            title: const Text("Workshop Management"),
-            onTap: () => Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => const WorkshopManagementScreen(),
+                  ListTile(
+                    leading: const Icon(Icons.event_available_outlined),
+                    title: const Text("Workshop Management"),
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const WorkshopManagementScreen(),
+                      ),
+                    ),
+                  ),
+                  ListTile(
+                    leading: const Icon(Icons.fact_check_outlined),
+                    title: const Text("Attendance Tracker"),
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const AttendanceTrackerScreen(),
+                      ),
+                    ),
+                  ),
+                  ListTile(
+                    leading: const Icon(Icons.build_outlined),
+                    title: const Text("Equipment Management"),
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const EquipmentManagementScreen(),
+                      ),
+                    ),
+                  ),
+                  ListTile(
+                    leading: const Icon(Icons.login_rounded),
+                    title: const Text("Lab Access Tracker"),
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const LabAccessTrackingScreen(),
+                      ),
+                    ),
+                  ),
+                  ListTile(
+                    leading: const Icon(Icons.notifications_none_outlined),
+                    title: const Text("Notifications"),
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const NotificationAnnouncementScreen(),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
           ),
-          ListTile(
-            leading: const Icon(Icons.fact_check_outlined),
-            title: const Text("Attendance Tracker"),
-            onTap: () => Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => const AttendanceTrackerScreen(),
-              ),
-            ),
-          ),
-          ListTile(
-            leading: const Icon(Icons.build_outlined),
-            title: const Text("Equipment Management"),
-            onTap: () => Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => const EquipmentManagementScreen(),
-              ),
-            ),
-          ),
-          ListTile(
-            leading: const Icon(Icons.notifications_none_outlined),
-            title: const Text("Notifications"),
-            onTap: () => Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => const NotificationAnnouncementScreen(),
-              ),
-            ),
-          ),
-              ],
-            ),
-          ),
-           ), 
           const Spacer(),
           ListTile(
             leading: const Icon(Icons.logout, color: Colors.red),
@@ -369,7 +391,8 @@ class _OverviewTab extends StatelessWidget {
               );
             }
 
-            final stats = statsSnap.data ?? {'activeStudents': 0, 'totalXpIssued': 0};
+            final stats =
+                statsSnap.data ?? {'activeStudents': 0, 'totalXpIssued': 0};
             final courseCount = courseCountSnap.data ?? 0;
 
             return SingleChildScrollView(
@@ -430,8 +453,22 @@ class _OverviewTab extends StatelessWidget {
                   ),
                   const SizedBox(height: 12),
                   _StatCard(
+                    title: 'Lab Access Tracker',
+                    value: 'MONITOR',
+                    icon: Icons.sensor_door_outlined,
+                    color: AppColors.plum,
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const LabAccessTrackingScreen(),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  _StatCard(
                     title: 'XP Issued',
-                    value: '${(stats['totalXpIssued'] / 1000).toStringAsFixed(1)}k',
+                    value:
+                        '${(stats['totalXpIssued'] / 1000).toStringAsFixed(1)}k',
                     icon: Icons.bolt_rounded,
                     color: Colors.orange,
                   ),
@@ -633,7 +670,7 @@ class _StatCard extends StatelessWidget {
             ),
           ),
           if (onTap != null)
-            const Icon(Icons.chevron_right, size: 18,color: AppColors.taupe),
+            const Icon(Icons.chevron_right, size: 18, color: AppColors.taupe),
         ],
       ),
     );
