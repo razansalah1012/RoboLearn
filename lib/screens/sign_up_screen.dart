@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../theme/app_colors.dart';
+import '../widgets/brand_logo.dart';
 import '../widgets/tech_background_animation.dart';
 import '../widgets/animated_interactive_card.dart';
 import 'student_home_screen.dart';
@@ -30,6 +32,7 @@ class _SignUpScreenState extends State<SignUpScreen>
 
   String _selectedRole = 'student';
   bool _isLoading = false;
+  bool _obscurePassword = true;
 
   @override
   void initState() {
@@ -66,14 +69,18 @@ class _SignUpScreenState extends State<SignUpScreen>
   void _handleSignUp() async {
     if (_formKey.currentState!.validate()) {
       setState(() => _isLoading = true);
-      
+
       final result = await authService.signUp(
         email: emailController.text.trim(),
         password: passwordController.text.trim(),
         name: nameController.text.trim(),
         role: _selectedRole,
-        matricNumber: matricController.text.trim().isEmpty ? null : matricController.text.trim(),
-        phoneNumber: phoneController.text.trim().isEmpty ? null : phoneController.text.trim(),
+        matricNumber: matricController.text.trim().isEmpty
+            ? null
+            : matricController.text.trim(),
+        phoneNumber: phoneController.text.trim().isEmpty
+            ? null
+            : phoneController.text.trim(),
       );
 
       if (result == null) {
@@ -82,7 +89,9 @@ class _SignUpScreenState extends State<SignUpScreen>
           // Committee members require approval
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
-              content: Text("Registration successful! Your committee account is pending admin approval."),
+              content: Text(
+                "Registration successful! Your committee account is pending admin approval.",
+              ),
               backgroundColor: Colors.orange,
             ),
           );
@@ -95,7 +104,7 @@ class _SignUpScreenState extends State<SignUpScreen>
           } else {
             nextScreen = const StudentHomeScreen();
           }
-          
+
           Navigator.pushAndRemoveUntil(
             context,
             MaterialPageRoute(builder: (context) => nextScreen),
@@ -105,10 +114,7 @@ class _SignUpScreenState extends State<SignUpScreen>
       } else {
         setState(() => _isLoading = false);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(result),
-            backgroundColor: Colors.red,
-          ),
+          SnackBar(content: Text(result), backgroundColor: Colors.red),
         );
       }
     }
@@ -146,19 +152,7 @@ class _SignUpScreenState extends State<SignUpScreen>
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        Center(
-                          child: Text(
-                            "RoboLearn",
-                            style: theme.textTheme.displaySmall,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Center(
-                          child: Text(
-                            "Create Your Account",
-                            style: theme.textTheme.bodyLarge,
-                          ),
-                        ),
+                        const BrandLogoLockup(markSize: 82, titleSize: 28),
                         const SizedBox(height: 30),
                         AnimatedInteractiveCard(
                           padding: const EdgeInsets.all(24.0),
@@ -168,12 +162,16 @@ class _SignUpScreenState extends State<SignUpScreen>
                               crossAxisAlignment: CrossAxisAlignment.stretch,
                               children: [
                                 Text(
-                                  "Registration Details",
-                                  style: theme.textTheme.titleLarge,
+                                  "ROBOTICS REGISTRATION",
+                                  style: GoogleFonts.orbitron(
+                                    fontSize: 17,
+                                    fontWeight: FontWeight.w800,
+                                    color: AppColors.cranberry,
+                                  ),
                                   textAlign: TextAlign.center,
                                 ),
                                 const SizedBox(height: 24),
-                                
+
                                 // Name
                                 TextFormField(
                                   controller: nameController,
@@ -181,7 +179,10 @@ class _SignUpScreenState extends State<SignUpScreen>
                                     labelText: "Full Name",
                                     prefixIcon: Icon(Icons.person_outline),
                                   ),
-                                  validator: (value) => value == null || value.isEmpty ? "Required" : null,
+                                  validator: (value) =>
+                                      value == null || value.isEmpty
+                                      ? "Required"
+                                      : null,
                                 ),
                                 const SizedBox(height: 16),
 
@@ -194,8 +195,11 @@ class _SignUpScreenState extends State<SignUpScreen>
                                   ),
                                   keyboardType: TextInputType.emailAddress,
                                   validator: (value) {
-                                    if (value == null || value.isEmpty) return "Required";
-                                    if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
+                                    if (value == null || value.isEmpty)
+                                      return "Required";
+                                    if (!RegExp(
+                                      r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
+                                    ).hasMatch(value)) {
                                       return "Invalid email format";
                                     }
                                     return null;
@@ -206,14 +210,27 @@ class _SignUpScreenState extends State<SignUpScreen>
                                 // Password
                                 TextFormField(
                                   controller: passwordController,
-                                  obscureText: true,
-                                  decoration: const InputDecoration(
+                                  obscureText: _obscurePassword,
+                                  decoration: InputDecoration(
                                     labelText: "Password",
-                                    prefixIcon: Icon(Icons.lock_outline),
+                                    prefixIcon: const Icon(Icons.lock_outline),
+                                    suffixIcon: IconButton(
+                                      icon: Icon(
+                                        _obscurePassword
+                                            ? Icons.visibility_outlined
+                                            : Icons.visibility_off_outlined,
+                                      ),
+                                      onPressed: () => setState(
+                                        () => _obscurePassword =
+                                            !_obscurePassword,
+                                      ),
+                                    ),
                                   ),
                                   validator: (value) {
-                                    if (value == null || value.isEmpty) return "Required";
-                                    if (value.length < 6) return "Password must be at least 6 characters";
+                                    if (value == null || value.isEmpty)
+                                      return "Required";
+                                    if (value.length < 6)
+                                      return "Password must be at least 6 characters";
                                     return null;
                                   },
                                 ),
@@ -227,7 +244,10 @@ class _SignUpScreenState extends State<SignUpScreen>
                                     prefixIcon: Icon(Icons.phone_outlined),
                                   ),
                                   keyboardType: TextInputType.phone,
-                                  validator: (value) => value == null || value.isEmpty ? "Required" : null,
+                                  validator: (value) =>
+                                      value == null || value.isEmpty
+                                      ? "Required"
+                                      : null,
                                 ),
                                 const SizedBox(height: 16),
 
@@ -235,8 +255,11 @@ class _SignUpScreenState extends State<SignUpScreen>
                                 TextFormField(
                                   controller: matricController,
                                   decoration: const InputDecoration(
-                                    labelText: "Matric Number (Optional for Admin)",
-                                    prefixIcon: Icon(Icons.assignment_ind_outlined),
+                                    labelText:
+                                        "Matric Number (Optional for Admin)",
+                                    prefixIcon: Icon(
+                                      Icons.assignment_ind_outlined,
+                                    ),
                                   ),
                                 ),
                                 const SizedBox(height: 16),
@@ -249,9 +272,18 @@ class _SignUpScreenState extends State<SignUpScreen>
                                     prefixIcon: Icon(Icons.badge_outlined),
                                   ),
                                   items: const [
-                                    DropdownMenuItem(value: 'student', child: Text("Student")),
-                                    DropdownMenuItem(value: 'committee', child: Text("Committee Member")),
-                                    DropdownMenuItem(value: 'admin', child: Text("Admin")),
+                                    DropdownMenuItem(
+                                      value: 'student',
+                                      child: Text("Student"),
+                                    ),
+                                    DropdownMenuItem(
+                                      value: 'committee',
+                                      child: Text("Committee Member"),
+                                    ),
+                                    DropdownMenuItem(
+                                      value: 'admin',
+                                      child: Text("Admin"),
+                                    ),
                                   ],
                                   onChanged: (value) {
                                     if (value != null) {
@@ -261,15 +293,37 @@ class _SignUpScreenState extends State<SignUpScreen>
                                 ),
                                 const SizedBox(height: 32),
 
-                                ElevatedButton(
-                                  onPressed: _isLoading ? null : _handleSignUp,
-                                  child: _isLoading
-                                      ? const SizedBox(
-                                          height: 20,
-                                          width: 20,
-                                          child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
-                                        )
-                                      : const Text("REGISTER"),
+                                DecoratedBox(
+                                  decoration: BoxDecoration(
+                                    gradient: AppColors.primaryGradient,
+                                    borderRadius: BorderRadius.circular(16),
+                                  ),
+                                  child: ElevatedButton(
+                                    onPressed: _isLoading
+                                        ? null
+                                        : _handleSignUp,
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: Colors.transparent,
+                                      shadowColor: Colors.transparent,
+                                      foregroundColor: Colors.white,
+                                    ),
+                                    child: _isLoading
+                                        ? const SizedBox(
+                                            height: 20,
+                                            width: 20,
+                                            child: CircularProgressIndicator(
+                                              strokeWidth: 2,
+                                              color: Colors.white,
+                                            ),
+                                          )
+                                        : Text(
+                                            "REGISTER",
+                                            style: GoogleFonts.orbitron(
+                                              fontWeight: FontWeight.bold,
+                                              letterSpacing: 0,
+                                            ),
+                                          ),
+                                  ),
                                 ),
                               ],
                             ),
@@ -279,10 +333,18 @@ class _SignUpScreenState extends State<SignUpScreen>
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Text("Already have an account? ", style: theme.textTheme.bodyMedium),
+                            Text(
+                              "Already have an account? ",
+                              style: theme.textTheme.bodyMedium,
+                            ),
                             TextButton(
                               onPressed: () => Navigator.pop(context),
-                              child: Text("Login", style: theme.textTheme.labelLarge?.copyWith(fontWeight: FontWeight.bold)),
+                              child: Text(
+                                "Login",
+                                style: theme.textTheme.labelLarge?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
                             ),
                           ],
                         ),

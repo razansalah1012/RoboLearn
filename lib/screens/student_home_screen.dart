@@ -8,6 +8,8 @@ import 'package:robolearn/screens/announcements_screen.dart';
 import '../theme/app_colors.dart';
 import '../widgets/custom_bottom_nav.dart';
 import '../widgets/tech_background_animation.dart';
+import '../widgets/brand_logo.dart';
+import '../widgets/robotics_blueprint.dart';
 import '../services/auth_service.dart';
 import '../services/notification_service.dart';
 import '../models/notification_model.dart';
@@ -109,19 +111,20 @@ class _HomeTabState extends State<_HomeTab> {
     _notificationSubscription = _notificationService
         .getNotificationsStream()
         .listen((notifications) {
-      if (notifications.isEmpty) {
-        return;
-      }
+          if (notifications.isEmpty) {
+            return;
+          }
 
-      final latestId = notifications.first.id;
-      _latestNotificationId = latestId;
+          final latestId = notifications.first.id;
+          _latestNotificationId = latestId;
 
-      if (_lastSeenNotificationId == null || _lastSeenNotificationId != latestId) {
-        setState(() {
-          _hasUnreadNotifications = true;
+          if (_lastSeenNotificationId == null ||
+              _lastSeenNotificationId != latestId) {
+            setState(() {
+              _hasUnreadNotifications = true;
+            });
+          }
         });
-      }
-    });
   }
 
   @override
@@ -133,9 +136,7 @@ class _HomeTabState extends State<_HomeTab> {
   Future<void> _openNotificationFeed(BuildContext context) async {
     await Navigator.push(
       context,
-      MaterialPageRoute(
-        builder: (_) => const NotificationFeedScreen(),
-      ),
+      MaterialPageRoute(builder: (_) => const NotificationFeedScreen()),
     );
 
     if (!mounted) return;
@@ -164,7 +165,9 @@ class _HomeTabState extends State<_HomeTab> {
               children: [
                 const SizedBox(height: 12),
                 _buildMainHero(context),
-                const SizedBox(height: 40),
+                const SizedBox(height: 24),
+                _buildQuickActions(context),
+                const SizedBox(height: 34),
                 _buildPlatformFeatures(context),
               ],
             ),
@@ -187,7 +190,7 @@ class _HomeTabState extends State<_HomeTab> {
 
         return Container(
           width: double.infinity,
-          padding: const EdgeInsets.fromLTRB(24, 10, 24, 10),
+          padding: const EdgeInsets.fromLTRB(20, 12, 20, 12),
           decoration: const BoxDecoration(
             color: AppColors.cranberry,
             borderRadius: BorderRadius.only(
@@ -199,28 +202,41 @@ class _HomeTabState extends State<_HomeTab> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'LOCKED IN,',
-                    style: GoogleFonts.orbitron(
-                      fontSize: 10,
-                      color: Colors.white70,
-                      fontWeight: FontWeight.w900,
-                      letterSpacing: 2,
+              Expanded(
+                child: Row(
+                  children: [
+                    const BrandLogoMark(size: 34, showHalo: false),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'LOCKED IN,',
+                            style: GoogleFonts.orbitron(
+                              fontSize: 10,
+                              color: Colors.white70,
+                              fontWeight: FontWeight.w900,
+                              letterSpacing: 0,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            userData?.name.split(' ').first.toUpperCase() ??
+                                'LEARNER',
+                            overflow: TextOverflow.ellipsis,
+                            style: GoogleFonts.orbitron(
+                              fontSize: 20,
+                              fontWeight: FontWeight.w900,
+                              color: Colors.white,
+                              letterSpacing: 0,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    userData?.name.split(' ').first.toUpperCase() ?? 'LEARNER',
-                    style: GoogleFonts.orbitron(
-                      fontSize: 20,
-                      fontWeight: FontWeight.w900,
-                      color: Colors.white,
-                    ),
-                  ),
-                ],
+                  ],
+                ),
               ),
               Row(
                 mainAxisSize: MainAxisSize.min,
@@ -250,10 +266,11 @@ class _HomeTabState extends State<_HomeTab> {
             decoration: BoxDecoration(
               color: Colors.white.withValues(alpha: 41),
               borderRadius: BorderRadius.circular(14),
+              border: Border.all(color: Colors.white.withValues(alpha: 0.22)),
             ),
             child: const Icon(
               Icons.notifications_none,
-              color: Color.fromARGB(255, 105, 11, 11),
+              color: AppColors.ivory,
               size: 24,
             ),
           ),
@@ -279,35 +296,53 @@ class _HomeTabState extends State<_HomeTab> {
   Widget _buildMainHero(BuildContext context) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.symmetric(vertical: 48, horizontal: 32),
+      padding: const EdgeInsets.fromLTRB(28, 28, 28, 32),
       decoration: BoxDecoration(
-        color: AppColors.plum,
-        borderRadius: BorderRadius.circular(40),
+        gradient: AppColors.heroGradient,
+        borderRadius: BorderRadius.circular(30),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.2),
-            blurRadius: 20,
-            offset: const Offset(0, 10),
+            color: AppColors.cranberry.withValues(alpha: 0.22),
+            blurRadius: 24,
+            offset: const Offset(0, 12),
           ),
         ],
       ),
       child: Column(
         children: [
-          const Icon(Icons.auto_awesome, color: Colors.white, size: 56),
-          const SizedBox(height: 28),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(999),
+              border: Border.all(color: Colors.white.withValues(alpha: 0.18)),
+            ),
+            child: Text(
+              "CLUB LAB  |  ROBOTICS PATH",
+              style: GoogleFonts.orbitron(
+                fontSize: 10,
+                fontWeight: FontWeight.w800,
+                color: AppColors.ivory,
+                letterSpacing: 0,
+              ),
+            ),
+          ),
+          const SizedBox(height: 18),
+          const RoboticsBlueprintVisual(height: 126, dark: true),
+          const SizedBox(height: 24),
           Text(
-            "ARCHITECT THE FUTURE",
+            "BUILD ROBOTICS SKILLS",
             textAlign: TextAlign.center,
             style: GoogleFonts.orbitron(
               fontSize: 28,
               fontWeight: FontWeight.w900,
               color: Colors.white,
-              letterSpacing: 2,
+              letterSpacing: 0,
             ),
           ),
           const SizedBox(height: 16),
           Text(
-            "Start your sequential journey from Arduino foundations to Advanced Robotics. By al jazari club",
+            "Move from microcontrollers and sensors to autonomous robot systems with guided modules and club workshops.",
             textAlign: TextAlign.center,
             style: GoogleFonts.exo2(
               color: Colors.white.withValues(alpha: 0.85),
@@ -375,31 +410,72 @@ class _HomeTabState extends State<_HomeTab> {
     );
   }
 
+  Widget _buildQuickActions(BuildContext context) {
+    final actions = [
+      _QuickActionData(
+        icon: Icons.menu_book_rounded,
+        title: 'Learning',
+        subtitle: 'Modules',
+        onTap: widget.onStartLearning,
+      ),
+      _QuickActionData(
+        icon: Icons.event_available_rounded,
+        title: 'Workshops',
+        subtitle: 'Events',
+        onTap: widget.onViewWorkshops,
+      ),
+      _QuickActionData(
+        icon: Icons.memory_rounded,
+        title: 'Equipment',
+        subtitle: 'Book lab kit',
+        onTap: () => Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => const EquipmentBookingScreen()),
+        ),
+      ),
+      _QuickActionData(
+        icon: Icons.notifications_active_outlined,
+        title: 'Updates',
+        subtitle: 'Club news',
+        onTap: () => _openNotificationFeed(context),
+      ),
+    ];
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const _SectionTitle(
+          title: "Quick Access",
+          subtitle: "Jump straight into the club tools you use most.",
+        ),
+        const SizedBox(height: 14),
+        GridView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          itemCount: actions.length,
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 2,
+            crossAxisSpacing: 12,
+            mainAxisSpacing: 12,
+            childAspectRatio: 1.55,
+          ),
+          itemBuilder: (context, index) =>
+              _QuickActionTile(data: actions[index]),
+        ),
+      ],
+    );
+  }
+
   Widget _buildPlatformFeatures(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Expanded(
-              child: Text(
-                "CONTINUE FROM WHERE YOU LEFT",
-                textAlign: TextAlign.center,
-                style: GoogleFonts.orbitron(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w900,
-                  color: AppColors.plum,
-                  letterSpacing: 1,
-                ),
-              ),
-            ),
-          ],
+        const _SectionTitle(
+          title: "Club Workflow",
+          subtitle: "Track participation, equipment, and announcements.",
         ),
-
         const SizedBox(height: 20),
-
-        GestureDetector(
+        _FeatureAction(
           onTap: () {
             Navigator.push(
               context,
@@ -415,13 +491,11 @@ class _HomeTabState extends State<_HomeTab> {
           ),
         ),
         const SizedBox(height: 16),
-        GestureDetector(
+        _FeatureAction(
           onTap: () {
             Navigator.push(
               context,
-              MaterialPageRoute(
-                builder: (_) => const EquipmentBookingScreen(),
-              ),
+              MaterialPageRoute(builder: (_) => const EquipmentBookingScreen()),
             );
           },
           child: const _FeatureTile(
@@ -431,7 +505,7 @@ class _HomeTabState extends State<_HomeTab> {
           ),
         ),
         const SizedBox(height: 16),
-        GestureDetector(
+        _FeatureAction(
           onTap: () {
             Navigator.push(
               context,
@@ -446,6 +520,151 @@ class _HomeTabState extends State<_HomeTab> {
           ),
         ),
       ],
+    );
+  }
+}
+
+class _SectionTitle extends StatelessWidget {
+  final String title;
+  final String subtitle;
+
+  const _SectionTitle({required this.title, required this.subtitle});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          title.toUpperCase(),
+          style: GoogleFonts.orbitron(
+            fontSize: 14,
+            fontWeight: FontWeight.w900,
+            color: AppColors.plum,
+            letterSpacing: 0,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          subtitle,
+          style: GoogleFonts.exo2(
+            fontSize: 13,
+            color: AppColors.taupe,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _QuickActionData {
+  final IconData icon;
+  final String title;
+  final String subtitle;
+  final VoidCallback onTap;
+
+  const _QuickActionData({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    required this.onTap,
+  });
+}
+
+class _QuickActionTile extends StatelessWidget {
+  final _QuickActionData data;
+
+  const _QuickActionTile({required this.data});
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: AppColors.ivory,
+      borderRadius: BorderRadius.circular(20),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(20),
+        onTap: data.onTap,
+        child: Ink(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: AppColors.plum.withValues(alpha: 0.10)),
+            boxShadow: [
+              BoxShadow(
+                color: AppColors.cranberry.withValues(alpha: 0.045),
+                blurRadius: 12,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(14),
+            child: Row(
+              children: [
+                Container(
+                  width: 42,
+                  height: 42,
+                  decoration: BoxDecoration(
+                    color: AppColors.roseTint,
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  child: Icon(data.icon, color: AppColors.cranberry, size: 22),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        data.title,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: GoogleFonts.orbitron(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w900,
+                          color: AppColors.cranberry,
+                          letterSpacing: 0,
+                        ),
+                      ),
+                      const SizedBox(height: 3),
+                      Text(
+                        data.subtitle,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: GoogleFonts.exo2(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.taupe,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _FeatureAction extends StatelessWidget {
+  final VoidCallback onTap;
+  final Widget child;
+
+  const _FeatureAction({required this.onTap, required this.child});
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(22),
+        onTap: onTap,
+        child: child,
+      ),
     );
   }
 }
@@ -519,12 +738,13 @@ class _FeatureTile extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(28),
+        color: AppColors.ivory,
+        borderRadius: BorderRadius.circular(22),
+        border: Border.all(color: AppColors.plum.withValues(alpha: 0.10)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
-            blurRadius: 8,
+            color: AppColors.cranberry.withValues(alpha: 0.06),
+            blurRadius: 14,
             offset: const Offset(0, 4),
           ),
         ],
@@ -534,10 +754,10 @@ class _FeatureTile extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(14),
             decoration: BoxDecoration(
-              color: AppColors.beige,
-              borderRadius: BorderRadius.circular(20),
+              gradient: AppColors.primaryGradient,
+              borderRadius: BorderRadius.circular(16),
             ),
-            child: Icon(icon, color: AppColors.plum, size: 30),
+            child: Icon(icon, color: AppColors.ivory, size: 28),
           ),
           const SizedBox(width: 20),
           Expanded(
@@ -557,12 +777,17 @@ class _FeatureTile extends StatelessWidget {
                   subtitle,
                   style: GoogleFonts.exo2(
                     fontSize: 13,
-                    color: Colors.grey,
+                    color: AppColors.taupe,
                     height: 1.4,
                   ),
                 ),
               ],
             ),
+          ),
+          const SizedBox(width: 12),
+          Icon(
+            Icons.chevron_right_rounded,
+            color: AppColors.plum.withValues(alpha: 0.56),
           ),
         ],
       ),

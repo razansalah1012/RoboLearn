@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../theme/app_colors.dart';
+import '../widgets/brand_logo.dart';
 import '../widgets/tech_background_animation.dart';
 import '../widgets/animated_interactive_card.dart';
 import '../services/auth_service.dart';
@@ -39,10 +40,7 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
       body: Stack(
         children: [
           const Positioned.fill(
-            child: Opacity(
-              opacity: 0.35,
-              child: TechBackgroundAnimation(),
-            ),
+            child: Opacity(opacity: 0.35, child: TechBackgroundAnimation()),
           ),
           SafeArea(
             child: SingleChildScrollView(
@@ -98,7 +96,8 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
           crossAxisCount: 2,
           crossAxisSpacing: 16,
           mainAxisSpacing: 16,
-          childAspectRatio: 1.4, // Reduced to 1.4 to provide more height and prevent overflow
+          childAspectRatio:
+              1.4, // Reduced to 1.4 to provide more height and prevent overflow
           children: [
             _StatCard(
               title: "Students",
@@ -182,7 +181,9 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
           title: "Approvals",
           onTap: () => Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => const MemberApprovalScreen()),
+            MaterialPageRoute(
+              builder: (context) => const MemberApprovalScreen(),
+            ),
           ),
         ),
         _ActionCard(
@@ -190,7 +191,9 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
           title: "Users",
           onTap: () => Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => const UserManagementScreen()),
+            MaterialPageRoute(
+              builder: (context) => const UserManagementScreen(),
+            ),
           ),
         ),
         _ActionCard(
@@ -198,7 +201,9 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
           title: "Roles",
           onTap: () => Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => const RoleManagementScreen()),
+            MaterialPageRoute(
+              builder: (context) => const RoleManagementScreen(),
+            ),
           ),
         ),
         _ActionCard(
@@ -206,7 +211,9 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
           title: "Notifications",
           onTap: () => Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => const NotificationManagementScreen()),
+            MaterialPageRoute(
+              builder: (context) => const NotificationManagementScreen(),
+            ),
           ),
         ),
       ],
@@ -229,28 +236,39 @@ class _AdminHeader extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                "ADMIN PORTAL",
-                style: GoogleFonts.orbitron(
-                  fontSize: 20,
-                  fontWeight: FontWeight.w900,
-                  color: AppColors.ivory,
-                  letterSpacing: 2,
+          Expanded(
+            child: Row(
+              children: [
+                const BrandLogoMark(size: 42, showHalo: false),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        "ADMIN PORTAL",
+                        overflow: TextOverflow.ellipsis,
+                        style: GoogleFonts.orbitron(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w900,
+                          color: AppColors.ivory,
+                          letterSpacing: 0,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        "System Architect Access",
+                        style: GoogleFonts.exo2(
+                          fontSize: 12,
+                          color: AppColors.ivory.withOpacity(0.7),
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                "System Architect Access",
-                style: GoogleFonts.exo2(
-                  fontSize: 12,
-                  color: AppColors.ivory.withOpacity(0.7),
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ],
+              ],
+            ),
           ),
           IconButton(
             onPressed: onLogout,
@@ -266,7 +284,12 @@ class _StatCard extends StatelessWidget {
   final String title, value;
   final IconData icon;
   final Color color;
-  const _StatCard({required this.title, required this.value, required this.icon, required this.color});
+  const _StatCard({
+    required this.title,
+    required this.value,
+    required this.icon,
+    required this.color,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -296,7 +319,10 @@ class _StatCard extends StatelessWidget {
                   Text(
                     title,
                     overflow: TextOverflow.ellipsis,
-                    style: GoogleFonts.exo2(fontSize: 10, color: AppColors.taupe),
+                    style: GoogleFonts.exo2(
+                      fontSize: 10,
+                      color: AppColors.taupe,
+                    ),
                   ),
                 ],
               ),
@@ -312,7 +338,11 @@ class _ActionCard extends StatelessWidget {
   final IconData icon;
   final String title;
   final VoidCallback onTap;
-  const _ActionCard({required this.icon, required this.title, required this.onTap});
+  const _ActionCard({
+    required this.icon,
+    required this.title,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {

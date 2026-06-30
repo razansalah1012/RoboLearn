@@ -17,10 +17,11 @@ class AnimatedInteractiveCard extends StatefulWidget {
   });
 
   @override
-  State<AnimatedInteractiveCard> createState() => _AnimatedInteractiveCardState();
+  State<AnimatedInteractiveCard> createState() =>
+      _AnimatedInteractiveCardState();
 }
 
-class _AnimatedInteractiveCardState extends State<AnimatedInteractiveCard> 
+class _AnimatedInteractiveCardState extends State<AnimatedInteractiveCard>
     with SingleTickerProviderStateMixin {
   bool _isHovered = false;
 
@@ -29,7 +30,9 @@ class _AnimatedInteractiveCardState extends State<AnimatedInteractiveCard>
     return MouseRegion(
       onEnter: (_) => setState(() => _isHovered = true),
       onExit: (_) => setState(() => _isHovered = false),
-      cursor: widget.onTap != null ? SystemMouseCursors.click : SystemMouseCursors.basic,
+      cursor: widget.onTap != null
+          ? SystemMouseCursors.click
+          : SystemMouseCursors.basic,
       child: GestureDetector(
         onTap: widget.onTap,
         child: AnimatedContainer(
@@ -39,7 +42,7 @@ class _AnimatedInteractiveCardState extends State<AnimatedInteractiveCard>
           transform: Matrix4.translationValues(0, _isHovered ? -4.0 : 0, 0)
             ..scale(_isHovered ? 1.01 : 1.0),
           decoration: BoxDecoration(
-            color: AppColors.pureWhite,
+            color: AppColors.ivory,
             borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
             border: Border.all(
               color: AppColors.plum.withAlpha((0.15 * 255).toInt()),
@@ -47,31 +50,34 @@ class _AnimatedInteractiveCardState extends State<AnimatedInteractiveCard>
             ),
             boxShadow: [
               BoxShadow(
-                color: _isHovered 
-                    ? AppColors.hoverShadowColor() 
+                color: _isHovered
+                    ? AppColors.hoverShadowColor()
                     : AppColors.cardShadowColor(),
                 blurRadius: _isHovered ? 20 : 12,
                 offset: Offset(0, _isHovered ? 6 : 2),
               ),
             ],
           ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
+          child: Stack(
             children: [
-              // Top Accent
-              Container(
-                height: 3,
-                decoration: const BoxDecoration(
-                  gradient: AppColors.primaryGradient,
-                  borderRadius: BorderRadius.vertical(
-                    top: Radius.circular(AppTheme.radiusMedium - 1),
-                  ),
-                ),
+              Positioned.fill(
+                child: CustomPaint(painter: _CardCircuitPainter()),
               ),
-              Padding(
-                padding: widget.padding,
-                child: widget.child,
+              Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Container(
+                    height: 3,
+                    decoration: const BoxDecoration(
+                      gradient: AppColors.primaryGradient,
+                      borderRadius: BorderRadius.vertical(
+                        top: Radius.circular(AppTheme.radiusMedium - 1),
+                      ),
+                    ),
+                  ),
+                  Padding(padding: widget.padding, child: widget.child),
+                ],
               ),
             ],
           ),
@@ -79,4 +85,26 @@ class _AnimatedInteractiveCardState extends State<AnimatedInteractiveCard>
       ),
     );
   }
+}
+
+class _CardCircuitPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = AppColors.plum.withAlpha(14)
+      ..strokeWidth = 1
+      ..style = PaintingStyle.stroke;
+
+    for (double y = 34; y < size.height; y += 52) {
+      final path = Path()
+        ..moveTo(size.width * 0.70, y)
+        ..lineTo(size.width - 28, y)
+        ..lineTo(size.width - 28, y + 22);
+      canvas.drawPath(path, paint);
+      canvas.drawCircle(Offset(size.width - 28, y + 22), 2.5, paint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

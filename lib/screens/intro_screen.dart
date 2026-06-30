@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import '../theme/app_colors.dart';
+import '../widgets/brand_logo.dart';
+import '../widgets/robotics_blueprint.dart';
 import '../widgets/tech_background_animation.dart';
 import 'login_screen.dart';
 
@@ -21,13 +23,12 @@ class IntroScreen extends StatelessWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Image.asset(
-                    'assets/logo.png',
-                    height: 130,
-                  ),
-                  const SizedBox(height: 30),
+                  const BrandLogoLockup(markSize: 118, titleSize: 34),
+                  const SizedBox(height: 26),
+                  const RoboticsBlueprintVisual(height: 120),
+                  const SizedBox(height: 22),
                   Text(
-                    "Welcome to RoboLearn",
+                    "Build Robotics Skills",
                     style: theme.textTheme.displaySmall,
                     textAlign: TextAlign.center,
                   ),
@@ -42,9 +43,7 @@ class IntroScreen extends StatelessWidget {
                     onPressed: () {
                       Navigator.pushReplacement(
                         context,
-                        MaterialPageRoute(
-                          builder: (_) => const LoginScreen(),
-                        ),
+                        MaterialPageRoute(builder: (_) => const LoginScreen()),
                       );
                     },
                     child: const Text("GET STARTED"),

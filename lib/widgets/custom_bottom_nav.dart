@@ -52,11 +52,12 @@ class CustomBottomNavBar extends StatelessWidget {
                 behavior: HitTestBehavior.opaque,
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 200),
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 6,
+                  ),
                   decoration: BoxDecoration(
-                    color: isSelected
-                        ? AppColors.cranberry.withAlpha(15)
-                        : Colors.transparent,
+                    color: isSelected ? AppColors.roseTint : Colors.transparent,
                     borderRadius: BorderRadius.circular(AppTheme.radiusPill),
                   ),
                   child: Column(
@@ -65,15 +66,21 @@ class CustomBottomNavBar extends StatelessWidget {
                       Icon(
                         items[i].icon,
                         size: 24,
-                        color: isSelected ? AppColors.cranberry : AppColors.taupe,
+                        color: isSelected
+                            ? AppColors.cranberry
+                            : AppColors.taupe,
                       ),
                       const SizedBox(height: 4),
                       Text(
                         items[i].label,
                         style: GoogleFonts.exo2(
                           fontSize: 10,
-                          fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
-                          color: isSelected ? AppColors.cranberry : AppColors.taupe,
+                          fontWeight: isSelected
+                              ? FontWeight.w600
+                              : FontWeight.w400,
+                          color: isSelected
+                              ? AppColors.cranberry
+                              : AppColors.taupe,
                         ),
                       ),
                     ],

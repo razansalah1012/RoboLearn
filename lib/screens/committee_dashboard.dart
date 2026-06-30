@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../theme/app_colors.dart';
+import '../widgets/brand_logo.dart';
+import '../widgets/robotics_blueprint.dart';
 import '../widgets/tech_background_animation.dart';
 import '../widgets/animated_interactive_card.dart';
 import '../services/auth_service.dart';
@@ -17,11 +19,11 @@ import 'committee/sponsorship_management_screen.dart';
 import 'committee/workshop_management_screen.dart';
 import 'committee/attendance_tracker_screen.dart';
 import 'committee/equipment_management_screen.dart';
+import 'committee/equipment_bookings_screen.dart';
 import 'committee/lab_access_tracking_screen.dart';
 import 'committee/notification_announcement_screen.dart';
 import 'create_announcement_screen.dart';
 import 'announcements_screen.dart';
-import '../widgets/placeholder_screen.dart';
 
 class CommitteeDashboard extends StatefulWidget {
   const CommitteeDashboard({super.key});
@@ -141,23 +143,7 @@ class _CommitteeDashboardState extends State<CommitteeDashboard>
                       ),
                     ),
                     const SizedBox(width: 8),
-                    GestureDetector(
-                      onTap: () => Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => const CommitteeProfileScreen(),
-                        ),
-                      ),
-                      child: CircleAvatar(
-                        radius: 20,
-                        backgroundImage: userData.profilePhotoUrl != null
-                            ? NetworkImage(userData.profilePhotoUrl!)
-                            : null,
-                        child: userData.profilePhotoUrl == null
-                            ? const Icon(Icons.person, size: 20)
-                            : null,
-                      ),
-                    ),
+                    const BrandLogoMark(size: 40, showHalo: false),
                     const SizedBox(width: 12),
                     Expanded(
                       child: Column(
@@ -165,10 +151,12 @@ class _CommitteeDashboardState extends State<CommitteeDashboard>
                         children: [
                           Text(
                             'Welcome, ${userData.name.split(' ').first}!',
+                            overflow: TextOverflow.ellipsis,
                             style: GoogleFonts.orbitron(
                               fontSize: 16,
                               fontWeight: FontWeight.w800,
                               color: AppColors.ivory,
+                              letterSpacing: 0,
                             ),
                           ),
                           Text(
@@ -191,14 +179,13 @@ class _CommitteeDashboardState extends State<CommitteeDashboard>
                       ),
                       onPressed: () async {
                         await _auth.logout();
-                        if (mounted) {
-                          Navigator.pushReplacement(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => const LoginScreen(),
-                            ),
-                          );
-                        }
+                        if (!context.mounted) return;
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const LoginScreen(),
+                          ),
+                        );
                       },
                     ),
                   ],
@@ -229,14 +216,43 @@ class _CommitteeDashboardState extends State<CommitteeDashboard>
     return Drawer(
       child: Column(
         children: [
-          const DrawerHeader(
-            decoration: BoxDecoration(gradient: AppColors.primaryGradient),
-            child: Center(
-              child: Icon(
-                Icons.precision_manufacturing,
-                size: 60,
-                color: Colors.white,
-              ),
+          DrawerHeader(
+            decoration: const BoxDecoration(
+              gradient: AppColors.primaryGradient,
+            ),
+            child: Row(
+              children: [
+                const BrandLogoMark(size: 68, showHalo: false),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'RoboLearn',
+                        overflow: TextOverflow.ellipsis,
+                        style: GoogleFonts.orbitron(
+                          color: AppColors.ivory,
+                          fontSize: 20,
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: 0,
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        'Committee Console',
+                        overflow: TextOverflow.ellipsis,
+                        style: GoogleFonts.exo2(
+                          color: AppColors.ivory.withAlpha(210),
+                          fontSize: 12,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
           ),
 
@@ -244,6 +260,7 @@ class _CommitteeDashboardState extends State<CommitteeDashboard>
             child: SingleChildScrollView(
               child: Column(
                 children: [
+                  const _DrawerSectionLabel('People'),
                   ListTile(
                     leading: const Icon(Icons.person_outline),
                     title: const Text("My Profile"),
@@ -276,6 +293,7 @@ class _CommitteeDashboardState extends State<CommitteeDashboard>
                   ),
                   const Divider(),
 
+                  const _DrawerSectionLabel('Communication'),
                   ListTile(
                     leading: const Icon(
                       Icons.announcement_outlined,
@@ -307,6 +325,7 @@ class _CommitteeDashboardState extends State<CommitteeDashboard>
                   ),
                   const Divider(),
 
+                  const _DrawerSectionLabel('Operations'),
                   ListTile(
                     leading: const Icon(Icons.event_available_outlined),
                     title: const Text("Workshop Management"),
@@ -329,11 +348,21 @@ class _CommitteeDashboardState extends State<CommitteeDashboard>
                   ),
                   ListTile(
                     leading: const Icon(Icons.build_outlined),
-                    title: const Text("Equipment Management"),
+                    title: const Text("Manage Lab Equipment"),
                     onTap: () => Navigator.push(
                       context,
                       MaterialPageRoute(
                         builder: (_) => const EquipmentManagementScreen(),
+                      ),
+                    ),
+                  ),
+                  ListTile(
+                    leading: const Icon(Icons.assignment_outlined),
+                    title: const Text("Equipment Bookings"),
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const EquipmentBookingsScreen(),
                       ),
                     ),
                   ),
@@ -361,13 +390,44 @@ class _CommitteeDashboardState extends State<CommitteeDashboard>
               ),
             ),
           ),
-          const Spacer(),
           ListTile(
             leading: const Icon(Icons.logout, color: Colors.red),
             title: const Text("Logout", style: TextStyle(color: Colors.red)),
-            onTap: () => _auth.logout(),
+            onTap: () async {
+              final navigator = Navigator.of(context);
+              await _auth.logout();
+              if (!mounted) return;
+              navigator.pushReplacement(
+                MaterialPageRoute(builder: (_) => const LoginScreen()),
+              );
+            },
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _DrawerSectionLabel extends StatelessWidget {
+  final String label;
+
+  const _DrawerSectionLabel(this.label);
+
+  @override
+  Widget build(BuildContext context) {
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(24, 12, 24, 6),
+        child: Text(
+          label.toUpperCase(),
+          style: GoogleFonts.orbitron(
+            color: AppColors.taupe,
+            fontSize: 10,
+            fontWeight: FontWeight.w900,
+            letterSpacing: 0,
+          ),
+        ),
       ),
     );
   }
@@ -398,7 +458,15 @@ class _OverviewTab extends StatelessWidget {
             return SingleChildScrollView(
               padding: const EdgeInsets.all(16),
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  const _CommitteeCommandPanel(),
+                  const SizedBox(height: 18),
+                  const _DashboardSectionTitle(
+                    title: 'Operations',
+                    subtitle: 'Fast access for daily robotics club tasks.',
+                  ),
+                  const SizedBox(height: 12),
                   _StatCard(
                     title: 'Active Students',
                     value: stats['activeStudents'].toString(),
@@ -415,7 +483,7 @@ class _OverviewTab extends StatelessWidget {
                   const SizedBox(height: 12),
                   _StatCard(
                     title: 'Workshop Management',
-                    value: 'MANAGE',
+                    value: 'WORKSHOPS',
                     icon: Icons.handyman_rounded,
                     color: AppColors.cranberry,
                     onTap: () => Navigator.push(
@@ -428,7 +496,7 @@ class _OverviewTab extends StatelessWidget {
                   const SizedBox(height: 12),
                   _StatCard(
                     title: 'Announcements',
-                    value: 'POST',
+                    value: 'POST NEWS',
                     icon: Icons.announcement_rounded,
                     color: Colors.orange,
                     onTap: () => Navigator.push(
@@ -466,6 +534,32 @@ class _OverviewTab extends StatelessWidget {
                   ),
                   const SizedBox(height: 12),
                   _StatCard(
+                    title: 'Manage Lab Equipment',
+                    value: 'INVENTORY',
+                    icon: Icons.memory_rounded,
+                    color: AppColors.cranberry,
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const EquipmentManagementScreen(),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  _StatCard(
+                    title: 'Equipment Bookings',
+                    value: 'REQUESTS',
+                    icon: Icons.assignment_outlined,
+                    color: AppColors.plum,
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const EquipmentBookingsScreen(),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  _StatCard(
                     title: 'XP Issued',
                     value:
                         '${(stats['totalXpIssued'] / 1000).toStringAsFixed(1)}k',
@@ -478,6 +572,102 @@ class _OverviewTab extends StatelessWidget {
           },
         );
       },
+    );
+  }
+}
+
+class _CommitteeCommandPanel extends StatelessWidget {
+  const _CommitteeCommandPanel();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(22),
+      decoration: BoxDecoration(
+        gradient: AppColors.heroGradient,
+        borderRadius: BorderRadius.circular(26),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.cranberry.withValues(alpha: 0.18),
+            blurRadius: 22,
+            offset: const Offset(0, 10),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              const BrandLogoMark(size: 48, showHalo: false),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'ROBOTICS OPS',
+                      style: GoogleFonts.orbitron(
+                        color: AppColors.ivory,
+                        fontSize: 17,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: 0,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'Manage courses, workshops, equipment, and club updates.',
+                      style: GoogleFonts.exo2(
+                        color: AppColors.ivory.withValues(alpha: 0.82),
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 18),
+          const RoboticsBlueprintVisual(height: 94, dark: true),
+        ],
+      ),
+    );
+  }
+}
+
+class _DashboardSectionTitle extends StatelessWidget {
+  final String title;
+  final String subtitle;
+
+  const _DashboardSectionTitle({required this.title, required this.subtitle});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          title.toUpperCase(),
+          style: GoogleFonts.orbitron(
+            fontSize: 14,
+            fontWeight: FontWeight.w900,
+            color: AppColors.plum,
+            letterSpacing: 0,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          subtitle,
+          style: GoogleFonts.exo2(
+            color: AppColors.taupe,
+            fontSize: 13,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+      ],
     );
   }
 }
